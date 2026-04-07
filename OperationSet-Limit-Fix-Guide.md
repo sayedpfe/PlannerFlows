@@ -70,20 +70,21 @@ service account. That slot is only released when the OperationSet reaches a term
 
 **Original Flow ID:** FFC9CF08-57FB-F011-8406-000D3AB2C546
 **Copy name:** `ChildFlow-PlannerTask-CreateUpdate-FIXED`
+**Copy Flow ID:** F1C76009-9732-F111-88B5-000D3AB2C546
 **Used by:** SyncExceltoPlanner
-**Status:** 🔄 In progress
+**Status:** 🔄 In progress — Step A complete, working on Step B
 
 **What to change:** Replace the single `Delay_-_Persist_to_Dataverse` (40 s) + single
 `Get_OperationSet` check with a polling loop that waits until the OperationSet is truly closed.
 
 ### Step A — Create the copy
-- [ ] **A1.** Go to **make.powerautomate.com**
-- [ ] **A2.** Navigate to **My flows** — find **ChildFlow-PlannerTask-CreateUpdate**
-- [ ] **A3.** Click the **...** (three dots) next to the flow → click **Save as**
-- [ ] **A4.** Name the copy: `ChildFlow-PlannerTask-CreateUpdate-FIXED`
-- [ ] **A5.** Click **Save**
-- [ ] **A6.** Open the copy and click **Edit** — confirm it has all the same actions as the original
-- [ ] **A7.** Note the new GUID from the URL bar (you will need it later when switching the parent)
+- [x] **A1.** Go to **make.powerautomate.com**
+- [x] **A2.** Navigate to **My flows** — find **ChildFlow-PlannerTask-CreateUpdate**
+- [x] **A3.** Click the **...** (three dots) next to the flow → click **Save as**
+- [x] **A4.** Name the copy: `ChildFlow-PlannerTask-CreateUpdate-FIXED`
+- [x] **A5.** Click **Save**
+- [x] **A6.** Open the copy and click **Edit** — confirm it has all the same actions as the original
+- [x] **A7.** Note the new GUID from the URL bar — **F1C76009-9732-F111-88B5-000D3AB2C546**
 
 > All remaining steps below are performed on the **COPY only**.
 > The original flow (FFC9CF08) must remain untouched.
