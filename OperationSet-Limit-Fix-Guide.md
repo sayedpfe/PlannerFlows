@@ -6,6 +6,37 @@ This guide walks through every portal change needed to fix the error.
 
 ---
 
+## Progress tracker
+
+| # | Flow | Status |
+|---|---|---|
+| 1 | `ChildFlow-PlannerTask-CreateUpdate` (FFC9CF08) | 🔄 In progress |
+| 2 | `ChildFlow-ScheduleAPIs-PlannerTask` (FCD62B40) | ⏳ Pending |
+| 3 | `PlannerDevOpsIntegration-Sync` (33C494CA) | ⏳ Pending |
+| 4 | `2PLANNER-NewWorkItemIsCreated-withoutfilters` (AC7D2707) | ⏳ Pending |
+| 5 | `AssignResourceFromSPList` (A2979AF6) | ⏳ Pending |
+
+---
+
+## Safe deployment strategy (copy-then-switch)
+
+To avoid breaking live flows while applying changes:
+
+1. **Copy** the child flow and rename the copy
+2. **Apply all changes** on the copy only
+3. **Test the copy** in isolation (manual trigger with test IDs)
+4. **Switch the parent** to point to the fixed copy
+5. **End-to-end test** via the parent flow
+6. **Turn off the original** (do NOT delete — keep as rollback)
+7. **Export solution + commit** to GitHub
+
+### Current environment context
+- `SyncExceltoPlanner` is ON but non-functional (its child flow `ChildFlow-PlannerTask-CreateUpdate` is OFF)
+- Safe to work — no live traffic on the child flow path
+- Test resources confirmed: ProjectID and BucketID available
+
+---
+
 ## Background: Why the error happens
 
 Every call to `CreateOperationSetV1` opens a slot against the 10-OperationSet limit for the
@@ -37,11 +68,25 @@ service account. That slot is only released when the OperationSet reaches a term
 
 # FIX 1 — `ChildFlow-PlannerTask-CreateUpdate`
 
-**Flow ID:** FFC9CF08-57FB-F011-8406-000D3AB2C546
+**Original Flow ID:** FFC9CF08-57FB-F011-8406-000D3AB2C546
+**Copy name:** `ChildFlow-PlannerTask-CreateUpdate-FIXED`
 **Used by:** SyncExceltoPlanner
+**Status:** 🔄 In progress
 
 **What to change:** Replace the single `Delay_-_Persist_to_Dataverse` (40 s) + single
 `Get_OperationSet` check with a polling loop that waits until the OperationSet is truly closed.
+
+### Step A — Create the copy
+- [ ] **A1.** Go to **make.powerautomate.com**
+- [ ] **A2.** Navigate to **My flows** — find **ChildFlow-PlannerTask-CreateUpdate**
+- [ ] **A3.** Click the **...** (three dots) next to the flow → click **Save as**
+- [ ] **A4.** Name the copy: `ChildFlow-PlannerTask-CreateUpdate-FIXED`
+- [ ] **A5.** Click **Save**
+- [ ] **A6.** Open the copy and click **Edit** — confirm it has all the same actions as the original
+- [ ] **A7.** Note the new GUID from the URL bar (you will need it later when switching the parent)
+
+> All remaining steps below are performed on the **COPY only**.
+> The original flow (FFC9CF08) must remain untouched.
 
 ### Current structure (actions at the bottom of the flow, in order):
 ```
@@ -74,128 +119,177 @@ Respond_to_a_Power_App_or_flow
 
 ---
 
-### Step-by-step portal instructions
+### Step B — Delete `Delay_-_Persist_to_Dataverse` on the COPY
 
-#### Step 1 — Open the flow
-1. Go to **make.powerautomate.com**
-2. Navigate to **My flows** → find **ChildFlow-PlannerTask-CreateUpdate**
-3. Click **Edit**
+> You should already be in **Edit** mode on `ChildFlow-PlannerTask-CreateUpdate-FIXED`
 
-#### Step 2 — Delete `Delay_-_Persist_to_Dataverse`
-1. Scroll down to find the action named **Delay - Persist to Dataverse**
-   (it shows as a clock/delay icon, description says 40 Seconds)
-2. Click the **...** (three dots) on that action card
-3. Click **Delete**
-4. Confirm deletion
+- [ ] **B1.** Scroll to the bottom of the flow. Locate the action **Delay - Persist to Dataverse**
+      (clock icon, note says "40 Seconds", sits below `Condition_1`)
+- [ ] **B2.** Click the **...** (three dots) on that action card
+- [ ] **B3.** Click **Delete** → confirm
 
-#### Step 3 — Delete `Get_OperationSet` (the standalone one, NOT inside any loop)
-1. Find the action named **Get_OperationSet** that sits directly below where the Delay was
-   (it uses Dataverse, entity = Operation Sets)
-2. Click the **...** on that action card
-3. Click **Delete**
-4. Confirm deletion
+### Step C — Delete the standalone `Get_OperationSet`
 
-> After deleting both, the `Did_OperationSet_succeed` condition will show a warning because
-> its expression references the deleted `Get_OperationSet` output. That is expected — you will
-> fix it in Step 7.
+> This is the `Get_OperationSet` outside any loop — it sits directly below where the Delay was.
+> Do NOT delete any `Get_OperationSet` inside a scope or loop if one exists.
 
-#### Step 4 — Add `Initialize variable` for polling status
-1. Click the **+** (plus / Add an action) button that now appears between
-   **Condition_1** and **Did_OperationSet_succeed**
-2. Search for **Initialize variable** and select it
-3. Configure:
-   - **Name:** `varOpSetStatus`
-   - **Type:** Integer
-   - **Value:** `0`
-4. Rename the action title to: `Initialize_varOpSetStatus`
+- [ ] **C1.** Find the **Get_OperationSet** action now at the top of the gap
+      (Dataverse connector, entity = Operation Sets)
+- [ ] **C2.** Click **...** → **Delete** → confirm
 
-#### Step 5 — Add `Do Until` loop (polling loop)
-1. Click the **+** button below `Initialize_varOpSetStatus`
-2. Search for **Do Until** under the **Control** category and select it
-3. In the **Do Until** configuration panel, set the **loop-exit condition**:
-   - Left side: click **Add**, choose **Expression**, type:
-     ```
-     variables('varOpSetStatus')
-     ```
-   - Operator: **is equal to**
-   - Right side: type `192350003`
-4. This alone exits only on Completed. To also exit on Failed (192350002), click
-   **Add row** (or **Edit in advanced mode**) and use the expression directly:
-   
-   **Switch to expression mode** and type:
-   ```
-   @or(equals(variables('varOpSetStatus'), 192350003), equals(variables('varOpSetStatus'), 192350002))
-   ```
-   Set comparison: **is equal to** `true`
+> ⚠️ After deleting both, the `Did_OperationSet_succeed` condition card will show a red
+> warning — its expression references the now-deleted `Get_OperationSet` output.
+> This is expected. You will fix it in Step G.
 
-5. Set loop **Limits**:
-   - Click **Settings** inside the Do Until card
-   - **Count:** `20`
-   - **Timeout:** `PT15M`  (15 minutes in ISO 8601 duration)
-   - Click **Done**
+### Step D — Add `Initialize variable` for polling status
 
-6. Rename the Do Until to: `Poll_Until_OperationSet_Done`
+- [ ] **D1.** Click the **+** button that now appears in the gap between
+      `Condition_1` and `Did_OperationSet_succeed`
+- [ ] **D2.** Search **Initialize variable** → select it
+- [ ] **D3.** Fill in:
+      - **Name:** `varOpSetStatus`
+      - **Type:** `Integer`
+      - **Value:** `0`
+- [ ] **D4.** Click the action title at the top and rename it to: `Initialize_varOpSetStatus`
 
-#### Step 6 — Add actions INSIDE the Do Until loop
+### Step E — Add the `Do Until` polling loop
 
-Click inside the Do Until loop body and add these 3 actions **in order**:
+- [ ] **E1.** Click **+** below `Initialize_varOpSetStatus`
+- [ ] **E2.** Search **Do Until** → select it (under the **Control** category)
+- [ ] **E3.** Set the loop exit condition. The Do Until condition panel has Left / Operator / Right:
+      - Click the **Left** field → switch to **Expression** tab → type:
+        ```
+        @or(equals(variables('varOpSetStatus'), 192350003), equals(variables('varOpSetStatus'), 192350002))
+        ```
+      - Operator: **is equal to**
+      - Right: `true`
 
-**Action 6a — Delay (15 seconds)**
-1. Click **+** inside the loop
-2. Search for **Delay** and select it (Control connector)
-3. Set **Count:** `15`, **Unit:** `Second`
-4. Rename to: `Delay_Poll_15s`
+      > This exits the loop when status is either Completed (192350003) OR Failed (192350002).
 
-**Action 6b — Get the OperationSet row**
-1. Click **+** below the Delay inside the loop
-2. Search for **Get a row** and select the **Microsoft Dataverse (legacy)** version
-   (same connector as the rest of the flow — `shared_commondataserviceforapps`)
-3. Configure:
-   - **Entity Name:** `Operation Sets` (type it and select `msdyn_operationsets`)
-   - **Item ID:** click the expression/fx button and type:
-     ```
-     outputs('OperationSetId')
-     ```
-4. Rename to: `Get_OperationSet_Poll`
+- [ ] **E4.** Set loop limits — click **Settings** (gear icon on the Do Until card):
+      - **Count:** `20`
+      - **Timeout:** `PT15M`
+      - Click **Done**
+- [ ] **E5.** Rename the Do Until to: `Poll_Until_OperationSet_Done`
 
-**Action 6c — Set the status variable**
-1. Click **+** below `Get_OperationSet_Poll` inside the loop
-2. Search for **Set variable** and select it
-3. Configure:
-   - **Name:** select `varOpSetStatus` from the dropdown
-   - **Value:** click **Expression** and type:
-     ```
-     outputs('Get_OperationSet_Poll')?['body/msdyn_status']
-     ```
-4. Rename to: `Set_varOpSetStatus`
+### Step F — Add 3 actions INSIDE the Do Until loop
 
-#### Step 7 — Update `Did_OperationSet_succeed` condition
-1. Click on the **Did_OperationSet_succeed** condition card
-2. The existing expression references the deleted `Get_OperationSet` — it shows an error
-3. Delete the broken expression row
-4. Add a new condition row:
-   - Left side — Expression:
-     ```
-     variables('varOpSetStatus')
-     ```
-   - Operator: **is equal to**
-   - Right side: `192350003`
-5. This means: if the final status is Completed, take the Yes/True path
+Click **Add an action** inside the `Poll_Until_OperationSet_Done` loop body.
+Add all three **in order**:
 
-#### Step 8 — Also update the Terminate (False branch) error message
-1. Inside the **Did_OperationSet_succeed** — **No/False** branch
-2. Click on `Terminate_as_Failed_for_failed_PSS_persist`
-3. Update the **Message** field to something more descriptive:
-   ```
-   OperationSet did not complete successfully. Final status: @{variables('varOpSetStatus')}
-   ```
+#### F1 — Delay 15 seconds
+- [ ] Search **Delay** → select it (Control connector)
+- [ ] Count: `15` / Unit: `Second`
+- [ ] Rename to: `Delay_Poll_15s`
 
-#### Step 9 — Save and test
-1. Click **Save**
-2. Test the flow with a single task (Create scenario) and verify:
-   - The Do Until loop runs at least 1 iteration (waits for the OperationSet)
-   - The loop exits with status 192350003
-   - The Respond action returns a taskid
+#### F2 — Get the OperationSet row from Dataverse
+- [ ] Click **+** below `Delay_Poll_15s` inside the loop
+- [ ] Search **Get a row by ID** → select **Microsoft Dataverse (legacy)**
+      (same connector already used in the rest of this flow)
+- [ ] Configure:
+      - **Table name:** type `Operation Sets` and select `msdyn_operationsets`
+      - **Row ID:** click the **Expression** (fx) tab and type:
+        ```
+        outputs('OperationSetId')
+        ```
+- [ ] Rename to: `Get_OperationSet_Poll`
+
+#### F3 — Set the status variable
+- [ ] Click **+** below `Get_OperationSet_Poll` inside the loop
+- [ ] Search **Set variable** → select it
+- [ ] Configure:
+      - **Name:** pick `varOpSetStatus` from the dropdown
+      - **Value:** click **Expression** tab and type:
+        ```
+        outputs('Get_OperationSet_Poll')?['body/msdyn_status']
+        ```
+- [ ] Rename to: `Set_varOpSetStatus`
+
+### Step G — Fix the `Did_OperationSet_succeed` condition
+
+- [ ] **G1.** Click on the **Did_OperationSet_succeed** condition card
+- [ ] **G2.** The existing left-side expression shows a red error (references deleted action)
+      — click the **X** or trash icon on that expression row to remove it
+- [ ] **G3.** Add a new condition row:
+      - Left side → **Expression** tab:
+        ```
+        variables('varOpSetStatus')
+        ```
+      - Operator: **is equal to**
+      - Right side: `192350003`
+- [ ] **G4.** Confirm: the **Yes** branch leads to `PSS_has_persisted_changes_to_Dataverse`
+      and the **No** branch leads to the Terminate action
+
+### Step H — Update the Terminate error message
+
+- [ ] **H1.** Inside **Did_OperationSet_succeed** → **No** branch
+- [ ] **H2.** Click on `Terminate_as_Failed_for_failed_PSS_persist`
+- [ ] **H3.** Replace the Message value with:
+      ```
+      OperationSet did not complete. Final status: @{variables('varOpSetStatus')}
+      ```
+
+### Step I — Save the COPY
+
+- [ ] **I1.** Click **Save** at the top
+- [ ] **I2.** Confirm no red errors remain on any action card
+      (the only acceptable warnings are yellow advisory ones, not red blocking ones)
+
+### Step J — Test the COPY in isolation (manual trigger)
+
+- [ ] **J1.** On the COPY flow page, click **Test** → **Manually** → **Run flow**
+- [ ] **J2.** Fill in the test inputs:
+      - **ProjectID:** _(your test Project GUID)_
+      - **TaskTitle:** `Test-PollingLoop-Fix1`
+      - **BucketID:** _(your test Bucket GUID)_
+      - **Start:** leave blank (optional)
+      - **End:** leave blank (optional)
+      - **TaskId:** leave blank (empty = CREATE path)
+- [ ] **J3.** Click **Run flow** → **Done**
+- [ ] **J4.** Watch the run history. Verify:
+      - `Call_CreateOperationSetV1` — ✅ Succeeded
+      - `Condition_1` — ✅ Succeeded (took the Create branch because TaskId was empty)
+      - `Initialize_varOpSetStatus` — ✅ Succeeded
+      - `Poll_Until_OperationSet_Done` — ✅ ran at least 1 iteration and exited
+      - `Set_varOpSetStatus` shows value `192350003` in the last iteration
+      - `Did_OperationSet_succeed` — ✅ took the **Yes** branch
+      - `Respond_to_a_Power_App_or_flow` — ✅ returned a non-empty `taskid`
+- [ ] **J5.** Record the returned `taskid` — verify the task appears in Planner Premium
+
+### Step K — Switch `SyncExceltoPlanner` to the COPY
+
+- [ ] **K1.** Note the GUID of the COPY from its URL in the browser address bar
+      (format: `https://make.powerautomate.com/environments/.../flows/XXXXXXXX-...`)
+- [ ] **K2.** Open **SyncExceltoPlanner** → click **Edit**
+- [ ] **K3.** Inside the `For_each` loop, find the **Run a Child Flow** action
+- [ ] **K4.** Click on it → the **Flow** dropdown shows the current child flow name
+- [ ] **K5.** Change the selection to **ChildFlow-PlannerTask-CreateUpdate-FIXED**
+- [ ] **K6.** Click **Save**
+
+### Step L — End-to-end test via SyncExceltoPlanner
+
+- [ ] **L1.** Trigger `SyncExceltoPlanner` (modify the watched SP list item or use Test)
+- [ ] **L2.** Check the run — confirm the `For_each` loop completes for all rows
+- [ ] **L3.** Confirm no OperationSet limit error in the run history
+- [ ] **L4.** Confirm tasks appear / update correctly in Planner Premium
+
+### Step M — Turn off the original flow
+
+- [ ] **M1.** Go to the **original** `ChildFlow-PlannerTask-CreateUpdate` (FFC9CF08)
+- [ ] **M2.** Click **...** → **Turn off**
+      ⚠️ Do NOT delete — keep as rollback for 2 weeks minimum
+
+### Step N — Export solution and commit to GitHub
+
+- [ ] **N1.** Export the updated solution from the Power Platform admin center or maker portal
+- [ ] **N2.** Replace the solution folder in the local workspace
+- [ ] **N3.** Run from VS Code terminal:
+      ```powershell
+      cd "d:\OneDrive\OneDrive - Microsoft\Documents\Learning Projects\PlannerFlows"
+      git add .
+      git commit -m "Fix 1: Replace fixed delay with polling loop in ChildFlow-PlannerTask-CreateUpdate-FIXED"
+      git push
+      ```
 
 ---
 
