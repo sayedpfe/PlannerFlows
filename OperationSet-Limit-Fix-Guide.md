@@ -10,7 +10,7 @@ This guide walks through every portal change needed to fix the error.
 
 | # | Flow | Status |
 |---|---|---|
-| 1 | `ChildFlow-PlannerTask-CreateUpdate` (FFC9CF08) | 🔄 In progress |
+| 1 | `ChildFlow-PlannerTask-CreateUpdate` (FFC9CF08) | 🔄 In progress — stopped at Step J (test) |
 | 2 | `ChildFlow-ScheduleAPIs-PlannerTask` (FCD62B40) | ⏳ Pending |
 | 3 | `PlannerDevOpsIntegration-Sync` (33C494CA) | ⏳ Pending |
 | 4 | `2PLANNER-NewWorkItemIsCreated-withoutfilters` (AC7D2707) | ⏳ Pending |
@@ -72,7 +72,7 @@ service account. That slot is only released when the OperationSet reaches a term
 **Copy name:** `ChildFlow-PlannerTask-CreateUpdate-FIXED`
 **Copy Flow ID:** F1C76009-9732-F111-88B5-000D3AB2C546
 **Used by:** SyncExceltoPlanner
-**Status:** 🔄 In progress — Step A complete, working on Step B
+**Status:** 🔄 In progress — Steps A–I complete, stopped at Step J (isolated test)
 
 **What to change:** Replace the single `Delay_-_Persist_to_Dataverse` (40 s) + single
 `Get_OperationSet` check with a polling loop that waits until the OperationSet is truly closed.
@@ -88,6 +88,9 @@ service account. That slot is only released when the OperationSet reaches a term
 
 > All remaining steps below are performed on the **COPY only**.
 > The original flow (FFC9CF08) must remain untouched.
+
+> **Session note (2026-04-07):** Steps B–I completed. Flow saved with no red errors.
+> Stopped at Step J — test pending next session.
 
 ### Current structure (actions at the bottom of the flow, in order):
 ```
@@ -120,44 +123,44 @@ Respond_to_a_Power_App_or_flow
 
 ---
 
-### Step B — Delete `Delay_-_Persist_to_Dataverse` on the COPY
+### ✅ Step B — Delete `Delay_-_Persist_to_Dataverse` on the COPY
 
 > You should already be in **Edit** mode on `ChildFlow-PlannerTask-CreateUpdate-FIXED`
 
-- [ ] **B1.** Scroll to the bottom of the flow. Locate the action **Delay - Persist to Dataverse**
+- [x] **B1.** Scroll to the bottom of the flow. Locate the action **Delay - Persist to Dataverse**
       (clock icon, note says "40 Seconds", sits below `Condition_1`)
-- [ ] **B2.** Click the **...** (three dots) on that action card
-- [ ] **B3.** Click **Delete** → confirm
+- [x] **B2.** Click the **...** (three dots) on that action card
+- [x] **B3.** Click **Delete** → confirm
 
-### Step C — Delete the standalone `Get_OperationSet`
+### ✅ Step C — Delete the standalone `Get_OperationSet`
 
 > This is the `Get_OperationSet` outside any loop — it sits directly below where the Delay was.
 > Do NOT delete any `Get_OperationSet` inside a scope or loop if one exists.
 
-- [ ] **C1.** Find the **Get_OperationSet** action now at the top of the gap
+- [x] **C1.** Find the **Get_OperationSet** action now at the top of the gap
       (Dataverse connector, entity = Operation Sets)
-- [ ] **C2.** Click **...** → **Delete** → confirm
+- [x] **C2.** Click **...** → **Delete** → confirm
 
 > ⚠️ After deleting both, the `Did_OperationSet_succeed` condition card will show a red
 > warning — its expression references the now-deleted `Get_OperationSet` output.
 > This is expected. You will fix it in Step G.
 
-### Step D — Add `Initialize variable` for polling status
+### ✅ Step D — Add `Initialize variable` for polling status
 
-- [ ] **D1.** Click the **+** button that now appears in the gap between
+- [x] **D1.** Click the **+** button that now appears in the gap between
       `Condition_1` and `Did_OperationSet_succeed`
-- [ ] **D2.** Search **Initialize variable** → select it
-- [ ] **D3.** Fill in:
+- [x] **D2.** Search **Initialize variable** → select it
+- [x] **D3.** Fill in:
       - **Name:** `varOpSetStatus`
       - **Type:** `Integer`
       - **Value:** `0`
-- [ ] **D4.** Click the action title at the top and rename it to: `Initialize_varOpSetStatus`
+- [x] **D4.** Click the action title at the top and rename it to: `Initialize_varOpSetStatus`
 
-### Step E — Add the `Do Until` polling loop
+### ✅ Step E — Add the `Do Until` polling loop
 
-- [ ] **E1.** Click **+** below `Initialize_varOpSetStatus`
-- [ ] **E2.** Search **Do Until** → select it (under the **Control** category)
-- [ ] **E3.** Set the loop exit condition. The Do Until condition panel has Left / Operator / Right:
+- [x] **E1.** Click **+** below `Initialize_varOpSetStatus`
+- [x] **E2.** Search **Do Until** → select it (under the **Control** category)
+- [x] **E3.** Set the loop exit condition. The Do Until condition panel has Left / Operator / Right:
       - Click the **Left** field → switch to **Expression** tab → type:
         ```
         @or(equals(variables('varOpSetStatus'), 192350003), equals(variables('varOpSetStatus'), 192350002))
@@ -167,76 +170,76 @@ Respond_to_a_Power_App_or_flow
 
       > This exits the loop when status is either Completed (192350003) OR Failed (192350002).
 
-- [ ] **E4.** Set loop limits — click **Settings** (gear icon on the Do Until card):
+- [x] **E4.** Set loop limits — click **Settings** (gear icon on the Do Until card):
       - **Count:** `20`
       - **Timeout:** `PT15M`
       - Click **Done**
-- [ ] **E5.** Rename the Do Until to: `Poll_Until_OperationSet_Done`
+- [x] **E5.** Rename the Do Until to: `Poll_Until_OperationSet_Done`
 
-### Step F — Add 3 actions INSIDE the Do Until loop
+### ✅ Step F — Add 3 actions INSIDE the Do Until loop
 
 Click **Add an action** inside the `Poll_Until_OperationSet_Done` loop body.
 Add all three **in order**:
 
 #### F1 — Delay 15 seconds
-- [ ] Search **Delay** → select it (Control connector)
-- [ ] Count: `15` / Unit: `Second`
-- [ ] Rename to: `Delay_Poll_15s`
+- [x] Search **Delay** → select it (Control connector)
+- [x] Count: `15` / Unit: `Second`
+- [x] Rename to: `Delay_Poll_15s`
 
 #### F2 — Get the OperationSet row from Dataverse
-- [ ] Click **+** below `Delay_Poll_15s` inside the loop
-- [ ] Search **Get a row by ID** → select **Microsoft Dataverse (legacy)**
+- [x] Click **+** below `Delay_Poll_15s` inside the loop
+- [x] Search **Get a row by ID** → select **Microsoft Dataverse (legacy)**
       (same connector already used in the rest of this flow)
-- [ ] Configure:
+- [x] Configure:
       - **Table name:** type `Operation Sets` and select `msdyn_operationsets`
       - **Row ID:** click the **Expression** (fx) tab and type:
         ```
         outputs('OperationSetId')
         ```
-- [ ] Rename to: `Get_OperationSet_Poll`
+- [x] Rename to: `Get_OperationSet_Poll`
 
 #### F3 — Set the status variable
-- [ ] Click **+** below `Get_OperationSet_Poll` inside the loop
-- [ ] Search **Set variable** → select it
-- [ ] Configure:
+- [x] Click **+** below `Get_OperationSet_Poll` inside the loop
+- [x] Search **Set variable** → select it
+- [x] Configure:
       - **Name:** pick `varOpSetStatus` from the dropdown
       - **Value:** click **Expression** tab and type:
         ```
         outputs('Get_OperationSet_Poll')?['body/msdyn_status']
         ```
-- [ ] Rename to: `Set_varOpSetStatus`
+- [x] Rename to: `Set_varOpSetStatus`
 
-### Step G — Fix the `Did_OperationSet_succeed` condition
+### ✅ Step G — Fix the `Did_OperationSet_succeed` condition
 
-- [ ] **G1.** Click on the **Did_OperationSet_succeed** condition card
-- [ ] **G2.** The existing left-side expression shows a red error (references deleted action)
+- [x] **G1.** Click on the **Did_OperationSet_succeed** condition card
+- [x] **G2.** The existing left-side expression shows a red error (references deleted action)
       — click the **X** or trash icon on that expression row to remove it
-- [ ] **G3.** Add a new condition row:
+- [x] **G3.** Add a new condition row:
       - Left side → **Expression** tab:
         ```
         variables('varOpSetStatus')
         ```
       - Operator: **is equal to**
       - Right side: `192350003`
-- [ ] **G4.** Confirm: the **Yes** branch leads to `PSS_has_persisted_changes_to_Dataverse`
+- [x] **G4.** Confirm: the **Yes** branch leads to `PSS_has_persisted_changes_to_Dataverse`
       and the **No** branch leads to the Terminate action
 
-### Step H — Update the Terminate error message
+### ✅ Step H — Update the Terminate error message
 
-- [ ] **H1.** Inside **Did_OperationSet_succeed** → **No** branch
-- [ ] **H2.** Click on `Terminate_as_Failed_for_failed_PSS_persist`
-- [ ] **H3.** Replace the Message value with:
+- [x] **H1.** Inside **Did_OperationSet_succeed** → **No** branch
+- [x] **H2.** Click on `Terminate_as_Failed_for_failed_PSS_persist`
+- [x] **H3.** Replace the Message value with:
       ```
       OperationSet did not complete. Final status: @{variables('varOpSetStatus')}
       ```
 
-### Step I — Save the COPY
+### ✅ Step I — Save the COPY
 
-- [ ] **I1.** Click **Save** at the top
-- [ ] **I2.** Confirm no red errors remain on any action card
+- [x] **I1.** Click **Save** at the top
+- [x] **I2.** Confirm no red errors remain on any action card
       (the only acceptable warnings are yellow advisory ones, not red blocking ones)
 
-### Step J — Test the COPY in isolation (manual trigger)
+### ⏸️ Step J — Test the COPY in isolation (manual trigger) — STOPPED HERE
 
 - [ ] **J1.** On the COPY flow page, click **Test** → **Manually** → **Run flow**
 - [ ] **J2.** Fill in the test inputs:
