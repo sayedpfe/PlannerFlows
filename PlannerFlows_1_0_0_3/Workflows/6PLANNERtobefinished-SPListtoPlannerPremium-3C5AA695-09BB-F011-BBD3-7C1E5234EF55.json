@@ -1,0 +1,172 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      },
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedcommondataserviceforapps_da480"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "undefined",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "7864b669-670e-44e4-aac8-f0365e6b2ee6"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Get_items": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "618608dc-1d75-4056-83d8-20efb629d416"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://basf.sharepoint.com/teams/NGBAGB-Pilot-ProjectManagement-06-ProcuretoPay",
+              "table": "10fca5e6-7ccc-459b-bc19-a73d7595a6c7"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 5000
+            }
+          }
+        },
+        "For_each": {
+          "foreach": "@outputs('Get_items')?['body/value']",
+          "actions": {
+            "Switch": {
+              "cases": {
+                "Case": {
+                  "case": "04_Testing",
+                  "actions": {
+                    "Add_a_new_row": {
+                      "runAfter": {
+                        "Perform_an_unbound_action_in_selected_environment": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "e61b721b-7c89-4c58-bd0d-2f37e7ad43cb"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "msdyn_projecttasks",
+                          "item/msdyn_project@odata.bind": "@outputs('Get_a_row_by_ID')?['body/msdyn_projectid']",
+                          "item/msdyn_projectbucket@odata.bind": "Bucket 1",
+                          "item/msdyn_subject": "@items('For_each')?['field_2']",
+                          "item/msdyn_scheduledend": "@items('For_each')?['field_6']",
+                          "item/msdyn_scheduledstart": "@items('For_each')?['field_5']",
+                          "item/msdyn_descriptionplaintext": "@items('For_each')?['field_4']"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "CreateRecord",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    },
+                    "Get_a_row_by_ID": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "msdyn_projects",
+                          "recordId": "14262cc3-501f-45c0-8e8c-b1baa884e136"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "GetItem",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    },
+                    "Perform_an_unbound_action_in_selected_environment": {
+                      "runAfter": {
+                        "Get_a_row_by_ID": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "organization": "https://orga238981b.crm4.dynamics.com",
+                          "actionName": "msdyn_PssCreateV2"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "PerformUnboundActionWithOrganization",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "default": {
+                "actions": {}
+              },
+              "expression": "@items('For_each')?['field_3']",
+              "metadata": {
+                "operationMetadataId": "723157a9-3cd0-48e7-b032-2e4524ecf057"
+              },
+              "type": "Switch"
+            }
+          },
+          "runAfter": {
+            "Get_items": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5edcf4da-e1ca-4b9d-843d-f34067e1d3c1"
+          },
+          "type": "Foreach"
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

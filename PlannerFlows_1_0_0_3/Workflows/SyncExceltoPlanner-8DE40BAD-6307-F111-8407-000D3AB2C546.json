@@ -1,0 +1,443 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_excelonlinebusiness": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedexcelonlinebusiness_aec16"
+        },
+        "api": {
+          "name": "shared_excelonlinebusiness"
+        }
+      },
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedcommondataserviceforapps_da480"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "When_an_item_or_a_file_is_modified": {
+          "recurrence": {
+            "interval": 1,
+            "frequency": "Minute"
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "7fa9aaec-95a2-4a0d-8cf9-fad1bb18c235"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://basf.sharepoint.com/sites/ngba-gb-planner-projects",
+              "table": "0f8994da-78b1-4d7f-b13a-07b1bfd30b32"
+            },
+            "host": {
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetOnChangedItems",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "concurrency": {
+              "runs": 1
+            }
+          }
+        }
+      },
+      "actions": {
+        "Condition": {
+          "actions": {
+            "List_rows_present_in_a_table": {
+              "runAfter": {},
+              "metadata": {
+                "01HC6GR4FDZXOD6RH2I5BIHIUCDZ4MLVGE": "/DSAP_WP3_Project Plan_2026-01-19_wave3.xlsx",
+                "tableId": "{9B35A5B6-A2E9-4224-8045-260450E1D140}",
+                "operationMetadataId": "72b098cc-dac6-44c6-a1c9-4701c3d1f84a",
+                "01HC6GR4FNBT5BK36RXFFZOJDYJOIMPU5Q": "/DSAP_WP3_Project Plan_2026-01-19_wave31.xlsx",
+                "01HC6GR4EADHRZLB7IW5AIPZPMOWVPIKV5": "/DSAP_WP3_Project Plan_2026-01-19_wave311.xlsx"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "source": "sites/basf.sharepoint.com,8b19f502-535a-46da-9b9a-5aec061d7a7b,a657059a-0c6c-43ac-9c9a-80272af07ade",
+                  "drive": "b!AvUZi1pT2kabmlrsBh16e5oFV6ZsDKxDnJqAJyrwet7alIkPsXh_TbE6B7G_0wsy",
+                  "file": "01HC6GR4FNBT5BK36RXFFZOJDYJOIMPU5Q",
+                  "table": "{9B35A5B6-A2E9-4224-8045-260450E1D140}"
+                },
+                "host": {
+                  "connectionName": "shared_excelonlinebusiness",
+                  "operationId": "GetItems",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "For_each": {
+              "foreach": "@outputs('List_rows_present_in_a_table')?['body/value']",
+              "actions": {
+                "Run_a_Child_Flow": {
+                  "runAfter": {
+                    "Compose_Existing_TaskId": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "c8fa817d-070a-4b86-bf6f-2568bdcc578e"
+                  },
+                  "type": "Workflow",
+                  "inputs": {
+                    "host": {
+                      "workflowReferenceName": "ffc9cf08-57fb-f011-8406-000d3ab2c546"
+                    },
+                    "body": {
+                      "text": "@variables('PlannerPlanID')",
+                      "text_1": "@items('For_each')?['Task']",
+                      "text_2": "@variables('BucketId')",
+                      "text_3": "@addDays('1899-12-30', int(items('For_each')?['Start']), 'MM/dd/yy')",
+                      "text_4": "@addDays('1899-12-30', int(items('For_each')?['End']), 'MM/dd/yy')",
+                      "text_5": "@outputs('Compose_Existing_TaskId')",
+                      "number": "@int(outputs('Compose_Outline_Level'))",
+                      "text_6": "@if(empty(outputs('Compose_Parent_Task_ID')), '', outputs('Compose_Parent_Task_ID'))",
+                      "number_1": "@float(items('For_each')?['% Complete'])",
+                      "text_7": "@outputs('Compose_Is_Leaf')"
+                    }
+                  }
+                },
+                "Compose_Outline_Level": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "3285bf3c-b410-48e5-8f8f-bc75fa195d26"
+                  },
+                  "type": "Compose",
+                  "inputs": "@length(split(items('For_each')?['PSP'],'.'))"
+                },
+                "Compose_Parent_PSP": {
+                  "runAfter": {
+                    "Compose_Outline_Level": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "3629a00f-b946-43c3-8ded-0c61e8a6f46b"
+                  },
+                  "type": "Compose",
+                  "inputs": "@if(\r\n  equals(length(split(items('For_each')?['PSP'], '.')), 1),\r\n  '',\r\n  substring(\r\n    items('For_each')?['PSP'],\r\n    0,\r\n    lastIndexOf(items('For_each')?['PSP'], '.')\r\n  )\r\n)\r\n"
+                },
+                "Compose_Parent_Task_ID": {
+                  "runAfter": {
+                    "Compose_Parent_PSP": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "5a7e1d28-757c-48a1-9f47-8914c62f64f1"
+                  },
+                  "type": "Compose",
+                  "inputs": "@if(\r\n  empty(outputs('Compose_Parent_PSP')),\r\n  null,\r\n  variables('taskMap')?[replace(outputs('Compose_Parent_PSP'), '.', '_')]\r\n)"
+                },
+                "Compose_Update_Map": {
+                  "runAfter": {
+                    "Run_a_Child_Flow": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "d010bdc7-b6df-4207-a16c-0d295aa6b966"
+                  },
+                  "type": "Compose",
+                  "inputs": "@setProperty(variables('taskMap'), replace(items('For_each')?['PSP'], '.', '_'), body('Run_a_Child_Flow')?['taskid'])"
+                },
+                "Set_variable": {
+                  "runAfter": {
+                    "Compose_Update_Map": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "3bfed31b-2ed1-4fd7-85c4-8c4da1485af1"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "taskMap",
+                    "value": "@outputs('Compose_Update_Map')"
+                  }
+                },
+                "Compose_Existing_TaskId": {
+                  "runAfter": {
+                    "List_Existing_Task": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "38b78d2a-0e8a-4771-abf5-6591883d18f6"
+                  },
+                  "type": "Compose",
+                  "inputs": "@if(\r\n  not(empty(variables('taskMap')?[replace(items('For_each')?['PSP'], '.', '_')])),\r\n  variables('taskMap')?[replace(items('For_each')?['PSP'], '.', '_')],\r\n  if(\r\n    greater(length(outputs('List_Existing_Task')?['body/value']), 0),\r\n    first(outputs('List_Existing_Task')?['body/value'])?['msdyn_projecttaskid'],\r\n    ''\r\n  )\r\n)"
+                },
+                "List_Existing_Task": {
+                  "runAfter": {
+                    "Compose_Is_Leaf": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "57ce06c0-a3c8-4504-9aa0-01dae6c42368"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "msdyn_projecttasks",
+                      "$filter": "msdyn_subject eq '@{items('For_each')?['Task']}' and msdyn_outlinelevel eq @{outputs('Compose_Outline_Level')} and _msdyn_project_value eq '@{variables('PlannerPlanID')}'",
+                      "$top": 1
+                    },
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Append_to_array_variable": {
+                  "runAfter": {
+                    "Set_variable": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "6a0c296f-2d2f-4969-a679-91186c110cd9"
+                  },
+                  "type": "AppendToArrayVariable",
+                  "inputs": {
+                    "name": "processedTaskIds",
+                    "value": "@body('Run_a_Child_Flow')?['taskid']"
+                  }
+                },
+                "Compose_Is_Leaf": {
+                  "runAfter": {
+                    "Compose_Parent_Task_ID": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "5c905a8c-853d-49f7-aedf-84ecdab1ef19"
+                  },
+                  "type": "Compose",
+                  "inputs": "@if(\r\n  contains(variables('summeryPSPs'), items('For_each')?['PSP']),\r\n  'false',\r\n  'true'\r\n)"
+                }
+              },
+              "runAfter": {
+                "Set_variable_1": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "b9fe11e8-eb3b-4f3f-8533-54f9e381482e"
+              },
+              "type": "Foreach",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 1
+                }
+              }
+            },
+            "Select_Parent_PSP": {
+              "runAfter": {
+                "List_rows_present_in_a_table": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "ffc65269-21f9-469d-b92a-dd7f64ccfe9d"
+              },
+              "type": "Select",
+              "inputs": {
+                "from": "@outputs('List_rows_present_in_a_table')?['body/value']",
+                "select": {
+                  "parentPSP": "@if(\r\n  equals(length(split(item()?['PSP'], '.')), 1),\r\n  '',\r\n  substring(\r\n    item()?['PSP'],\r\n    0,\r\n    lastIndexOf(item()?['PSP'], '.')\r\n  )\r\n)"
+                }
+              }
+            },
+            "Compose_summeryList": {
+              "runAfter": {
+                "Select_Parent_PSP": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "11877b60-6527-4621-b336-0dfe5a698c62"
+              },
+              "type": "Compose",
+              "inputs": "@xpath(xml(json(concat('{\"root\":{\"item\":', string(body('Select_Parent_PSP')), '}}'))), '//parentPSP/text()')"
+            },
+            "Set_variable_1": {
+              "runAfter": {
+                "Compose_summeryList": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "07cb7ca8-dd95-4741-ba22-5964ef8057c8"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "summeryPSPs",
+                "value": "@outputs('Compose_summeryList')"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_BucketId": [
+              "Succeeded"
+            ]
+          },
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@triggerBody()?['{Name}']",
+                  "DSAP_WP3_Project Plan_2026-01-19_wave31"
+                ]
+              }
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "94582b93-9a4b-4631-ac7c-4f27fa25db04"
+          },
+          "type": "If"
+        },
+        "Initialize_variable_TaskMap": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "ee59fa08-38eb-463d-a417-eafaf225dc73"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "taskMap",
+                "type": "object",
+                "value": {}
+              }
+            ]
+          }
+        },
+        "Initialize_processedTaskIds": {
+          "runAfter": {
+            "Initialize_variable_TaskMap": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "00b05692-763e-4f5e-8ced-3fa19d4e6dea"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "processedTaskIds",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Initialize_PlannerPlanID": {
+          "runAfter": {
+            "Initialize_processedTaskIds": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "0c0e54e7-0045-4aa9-96da-448d07c8d8c8"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "PlannerPlanID",
+                "type": "string",
+                "value": "b05d9008-aaa1-4fc5-9176-2129b607884c"
+              }
+            ]
+          }
+        },
+        "Initialize_BucketId": {
+          "runAfter": {
+            "Initialize_summeryPSPs": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e677b241-435a-4770-909c-d32b4611a1b8"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "BucketId",
+                "type": "string",
+                "value": "ea8e207d-87f1-4038-8dc5-7095cc41c7f0\n"
+              }
+            ]
+          }
+        },
+        "Initialize_summeryPSPs": {
+          "runAfter": {
+            "Initialize_PlannerPlanID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f5d39717-258f-45ed-ad53-e77eace0b99d"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "summeryPSPs",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

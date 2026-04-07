@@ -1,0 +1,163 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      },
+      "shared_visualstudioteamservices": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedvisualstudioteamservices_df734"
+        },
+        "api": {
+          "name": "shared_visualstudioteamservices"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "When_a_work_item_is_created_2": {
+          "recurrence": {
+            "interval": 1,
+            "frequency": "Minute"
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "6ea7c2e1-182e-48be-9f89-b1217450b463"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "account": "basf4AP",
+              "project": "WP2-3 - PH Design-IT Setup",
+              "wiql__System_WorkItemType": "Data Migration POAP"
+            },
+            "host": {
+              "connectionName": "shared_visualstudioteamservices",
+              "operationId": "OnWorkItemCreatedV2",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Get_items": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "73d86e1d-a537-40c2-b453-2ad8047d168e"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://basf.sharepoint.com/sites/ngba-gb-planner-projects",
+              "table": "0385b40f-18a0-4253-9da4-ce2e639daf45",
+              "$filter": "ADO_Iteration eq '@{triggerOutputs()?['body/fields/System_IterationPath']}' and ADO_Area eq '@{triggerOutputs()?['body/fields/System_AreaPath']}'"
+            },
+            "host": {
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetItems",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Apply_to_each": {
+          "foreach": "@outputs('Get_items')?['body/value']",
+          "actions": {
+            "Run_a_Child_Flow": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "9f30c3fe-8aa7-4ce6-8dd7-bbaef34d763b"
+              },
+              "type": "Workflow",
+              "inputs": {
+                "host": {
+                  "workflowReferenceName": "fcd62b40-16d5-f011-8544-7c1e5234ef55"
+                },
+                "body": {
+                  "text": "@items('Apply_to_each')?['Title']",
+                  "text_1": "@triggerOutputs()?['body/fields/System_Title']",
+                  "text_2": "@items('Apply_to_each')?['BucketId']"
+                }
+              }
+            },
+            "Create_item": {
+              "runAfter": {
+                "Run_a_Child_Flow": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "e758ca8d-3181-4272-bd5f-bdca8c8082a7"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://basf.sharepoint.com/sites/ngba-gb-planner-projects",
+                  "table": "f447dc91-5769-4d84-808a-00caa3b94afb",
+                  "item/Title": "@triggerOutputs()?['body/fields/System_Title']",
+                  "item/ADO_ID": "@triggerOutputs()?['body/fields/System_Id']",
+                  "item/PlannerPlanID": "@items('Apply_to_each')?['Title']",
+                  "item/PlannerTaskId": "@body('Run_a_Child_Flow')?['taskid']",
+                  "item/ADO_Area": "@triggerOutputs()?['body/fields/System_AreaPath']",
+                  "item/ADO_Iteration": "@triggerOutputs()?['body/fields/System_IterationPath']",
+                  "item/ADO_Project": "@triggerOutputs()?['body/fields/System_TeamProject']",
+                  "item/Start": "@triggerOutputs()?['body/fields/Custom_StartDate_Actual']",
+                  "item/EndDate": "@triggerOutputs()?['body/fields/Custom_EndDate_Actual']",
+                  "item/ADO_BO_ID": "@triggerOutputs()?['body/fields/Custom_BO_ID']",
+                  "item/ADO_Primary_Owner": "@triggerOutputs()?['body/fields/Custom_PrimaryOwner_DMP']",
+                  "item/ADO_State": "@triggerOutputs()?['body/fields/System_State']",
+                  "item/ADO_Task_Type": "@triggerOutputs()?['body/fields/Custom_TaskType_DMP']",
+                  "item/ADO_Start_Baseline": "@triggerOutputs()?['body/fields/Custom_StartDate_Plan']",
+                  "item/ADO_End_Baseline": "@triggerOutputs()?['body/fields/Custom_EndDate_Plan']",
+                  "item/ADO_Responsible": "@triggerOutputs()?['body/fields/Custom_Responsible']"
+                },
+                "host": {
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "PostItem",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_items": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7e58a743-1ec7-41f0-b24c-28a72256e984"
+          },
+          "type": "Foreach"
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

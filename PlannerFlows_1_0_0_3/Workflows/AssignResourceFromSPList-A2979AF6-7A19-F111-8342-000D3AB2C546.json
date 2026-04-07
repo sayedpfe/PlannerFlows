@@ -1,0 +1,100 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "When_an_item_is_created_or_modified": {
+          "recurrence": {
+            "interval": 1,
+            "frequency": "Minute"
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "a57710d6-257d-499d-8727-702761ce2cc4"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetOnUpdatedItems",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
+            },
+            "parameters": {
+              "dataset": "https://basf.sharepoint.com/sites/ngba-gb-planner-projects",
+              "table": "f447dc91-5769-4d84-808a-00caa3b94afb"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Condition_2": {
+          "actions": {
+            "Apply_to_each": {
+              "foreach": "@triggerOutputs()?['body/Resource']",
+              "actions": {
+                "Run_a_Child_Flow": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "cca3aacf-c201-4f97-bd8f-2f2b05477a98"
+                  },
+                  "type": "Workflow",
+                  "inputs": {
+                    "host": {
+                      "workflowReferenceName": "b717670b-6719-f111-8342-000d3ab2c546"
+                    },
+                    "body": {
+                      "text_2": "@items('Apply_to_each')?['Email']",
+                      "text": "@triggerOutputs()?['body/PlannerPlanID']",
+                      "text_1": "@triggerOutputs()?['body/PlannerTaskId']"
+                    }
+                  }
+                }
+              },
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "b3b00b2f-2189-41d2-9eb9-4d912a649ad7"
+              },
+              "type": "Foreach"
+            }
+          },
+          "runAfter": {},
+          "expression": {
+            "greater": [
+              "@length(triggerOutputs()?['body/Resource'])",
+              0
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b16e8f83-8db1-42d5-a1b5-281dc55fe01c"
+          },
+          "type": "If"
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

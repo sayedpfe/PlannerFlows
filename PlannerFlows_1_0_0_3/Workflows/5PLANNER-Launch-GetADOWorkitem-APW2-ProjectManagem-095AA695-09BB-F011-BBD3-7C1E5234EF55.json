@@ -1,0 +1,857 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      },
+      "shared_projectonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedprojectonline_2805b"
+        },
+        "api": {
+          "name": "shared_projectonline"
+        }
+      },
+      "shared_visualstudioteamservices": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedvisualstudioteamservices_df734"
+        },
+        "api": {
+          "name": "shared_visualstudioteamservices"
+        }
+      },
+      "shared_planner": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedplanner_746db"
+        },
+        "api": {
+          "name": "shared_planner"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "When_a_task_is_completed": {
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "3fdeeaea-1447-40ab-8579-9c6dc1f1235b"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "OnCompleteTask_V3"
+            },
+            "parameters": {
+              "groupId": "5fb8c065-fca6-4409-a888-cd272c404f09",
+              "id": "G3D4cEEQik61vgpGFfgQ1JYAEC8c"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Get_Task_with_Planner_ID": {
+          "runAfter": {
+            "Initialize_vProjectURL": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6edbce1a-af3a-4a66-b360-1efc1aded2a1"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "parameters": {
+              "dataset": "https://basf.sharepoint.com/sites/gb-project-management",
+              "parameters/method": "GET",
+              "parameters/uri": "/_api/ProjectData/Tasks?$filter=Planner_ID eq '@{triggerOutputs()?['body/id']}'",
+              "parameters/headers": {
+                "Accept": "application/json;odata=nometadata"
+              },
+              "parameters/body": "\n\n"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Parse_JSON_Created_Task": {
+          "runAfter": {
+            "Get_Task_with_Planner_ID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4c958046-7bd1-4818-a8d1-efe52fc6fbb8"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@body('Get_Task_with_Planner_ID')",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ProjectId": {
+                        "type": "string"
+                      },
+                      "TaskId": {
+                        "type": "string"
+                      },
+                      "ParentTaskId": {
+                        "type": "string"
+                      },
+                      "ParentTaskName": {
+                        "type": "string"
+                      },
+                      "ProjectName": {
+                        "type": "string"
+                      },
+                      "TaskActualCost": {
+                        "type": "string"
+                      },
+                      "TaskActualDuration": {
+                        "type": "string"
+                      },
+                      "TaskActualFinishDate": {},
+                      "TaskActualFixedCost": {
+                        "type": "string"
+                      },
+                      "TaskActualOvertimeCost": {
+                        "type": "string"
+                      },
+                      "TaskActualOvertimeWork": {
+                        "type": "string"
+                      },
+                      "TaskActualRegularCost": {
+                        "type": "string"
+                      },
+                      "TaskActualRegularWork": {
+                        "type": "string"
+                      },
+                      "TaskActualStartDate": {},
+                      "TaskActualWork": {
+                        "type": "string"
+                      },
+                      "TaskACWP": {
+                        "type": "string"
+                      },
+                      "TaskBCWP": {
+                        "type": "string"
+                      },
+                      "TaskBCWS": {
+                        "type": "string"
+                      },
+                      "TaskBudgetCost": {
+                        "type": "string"
+                      },
+                      "TaskBudgetWork": {
+                        "type": "string"
+                      },
+                      "TaskClientUniqueId": {
+                        "type": "integer"
+                      },
+                      "TaskCost": {
+                        "type": "string"
+                      },
+                      "TaskCostVariance": {
+                        "type": "string"
+                      },
+                      "TaskCPI": {
+                        "type": "string"
+                      },
+                      "TaskCreatedDate": {
+                        "type": "string"
+                      },
+                      "TaskCreatedRevisionCounter": {
+                        "type": "integer"
+                      },
+                      "TaskCV": {
+                        "type": "string"
+                      },
+                      "TaskCVP": {
+                        "type": "string"
+                      },
+                      "TaskDeadline": {},
+                      "TaskDeliverableFinishDate": {},
+                      "TaskDeliverableStartDate": {},
+                      "TaskDuration": {
+                        "type": "string"
+                      },
+                      "TaskDurationIsEstimated": {
+                        "type": "boolean"
+                      },
+                      "TaskDurationString": {},
+                      "TaskDurationVariance": {
+                        "type": "string"
+                      },
+                      "TaskEAC": {
+                        "type": "string"
+                      },
+                      "TaskEarlyFinish": {
+                        "type": "string"
+                      },
+                      "TaskEarlyStart": {
+                        "type": "string"
+                      },
+                      "TaskFinishDate": {
+                        "type": "string"
+                      },
+                      "TaskFinishDateString": {},
+                      "TaskFinishVariance": {
+                        "type": "string"
+                      },
+                      "TaskFixedCost": {
+                        "type": "string"
+                      },
+                      "TaskFixedCostAssignmentId": {
+                        "type": "string"
+                      },
+                      "TaskFreeSlack": {
+                        "type": "string"
+                      },
+                      "TaskHyperLinkAddress": {},
+                      "TaskHyperLinkFriendlyName": {},
+                      "TaskHyperLinkSubAddress": {},
+                      "TaskIgnoresResourceCalendar": {
+                        "type": "boolean"
+                      },
+                      "TaskIndex": {
+                        "type": "integer"
+                      },
+                      "TaskIsActive": {
+                        "type": "boolean"
+                      },
+                      "TaskIsCritical": {
+                        "type": "boolean"
+                      },
+                      "TaskIsEffortDriven": {
+                        "type": "boolean"
+                      },
+                      "TaskIsExternal": {
+                        "type": "boolean"
+                      },
+                      "TaskIsManuallyScheduled": {
+                        "type": "boolean"
+                      },
+                      "TaskIsMarked": {
+                        "type": "boolean"
+                      },
+                      "TaskIsMilestone": {
+                        "type": "boolean"
+                      },
+                      "TaskIsOverallocated": {
+                        "type": "boolean"
+                      },
+                      "TaskIsProjectSummary": {
+                        "type": "boolean"
+                      },
+                      "TaskIsRecurring": {
+                        "type": "boolean"
+                      },
+                      "TaskIsSummary": {
+                        "type": "boolean"
+                      },
+                      "TaskLateFinish": {
+                        "type": "string"
+                      },
+                      "TaskLateStart": {
+                        "type": "string"
+                      },
+                      "TaskLevelingDelay": {
+                        "type": "string"
+                      },
+                      "TaskModifiedDate": {
+                        "type": "string"
+                      },
+                      "TaskModifiedRevisionCounter": {
+                        "type": "integer"
+                      },
+                      "TaskName": {
+                        "type": "string"
+                      },
+                      "TaskOutlineLevel": {
+                        "type": "integer"
+                      },
+                      "TaskOutlineNumber": {
+                        "type": "string"
+                      },
+                      "TaskOvertimeCost": {
+                        "type": "string"
+                      },
+                      "TaskOvertimeWork": {
+                        "type": "string"
+                      },
+                      "TaskPercentCompleted": {
+                        "type": "integer"
+                      },
+                      "TaskPercentWorkCompleted": {
+                        "type": "integer"
+                      },
+                      "TaskPhysicalPercentCompleted": {
+                        "type": "integer"
+                      },
+                      "TaskPriority": {
+                        "type": "integer"
+                      },
+                      "TaskRegularCost": {
+                        "type": "string"
+                      },
+                      "TaskRegularWork": {
+                        "type": "string"
+                      },
+                      "TaskRemainingCost": {
+                        "type": "string"
+                      },
+                      "TaskRemainingDuration": {
+                        "type": "string"
+                      },
+                      "TaskRemainingOvertimeCost": {
+                        "type": "string"
+                      },
+                      "TaskRemainingOvertimeWork": {
+                        "type": "string"
+                      },
+                      "TaskRemainingRegularCost": {
+                        "type": "string"
+                      },
+                      "TaskRemainingRegularWork": {
+                        "type": "string"
+                      },
+                      "TaskRemainingWork": {
+                        "type": "string"
+                      },
+                      "TaskResourcePlanWork": {
+                        "type": "string"
+                      },
+                      "TaskSPI": {
+                        "type": "string"
+                      },
+                      "TaskStartDate": {
+                        "type": "string"
+                      },
+                      "TaskStartDateString": {},
+                      "TaskStartVariance": {
+                        "type": "string"
+                      },
+                      "TaskStatusManagerUID": {
+                        "type": "string"
+                      },
+                      "TaskSV": {
+                        "type": "string"
+                      },
+                      "TaskSVP": {
+                        "type": "string"
+                      },
+                      "TaskTCPI": {
+                        "type": "string"
+                      },
+                      "TaskTotalSlack": {
+                        "type": "string"
+                      },
+                      "TaskVAC": {
+                        "type": "string"
+                      },
+                      "TaskWBS": {
+                        "type": "string"
+                      },
+                      "TaskWork": {
+                        "type": "string"
+                      },
+                      "TaskWorkVariance": {
+                        "type": "string"
+                      },
+                      "Health": {},
+                      "FlagStatus": {},
+                      "Test2": {},
+                      "Taskfield2Text1": {},
+                      "WorkItemID": {},
+                      "ADO_ID": {},
+                      "ADO_State": {},
+                      "ADO_BO_ID": {},
+                      "ADO_Iteration": {},
+                      "ADO_Area": {},
+                      "ADO_Start_Baseline": {},
+                      "ADO_End_Baseline": {},
+                      "ADO_Responsible": {},
+                      "PBI_Test_Package": {},
+                      "PBI_Test_Case_Description": {},
+                      "PBI_Test_Priority": {},
+                      "PBI_Test_Status": {},
+                      "PBI_Test_Changed_On": {},
+                      "PBI_Test_Changed_By": {},
+                      "PBI_Test_Open_Defects": {},
+                      "PBI_Defect_Description": {},
+                      "PBI_Defect_ID": {},
+                      "PBI_Defect_Link": {},
+                      "PBI_Defect_Category": {},
+                      "PBI_Test_Plan": {},
+                      "PBI_Test_Link": {},
+                      "PBI_Defect_KPI": {},
+                      "PBI_Defect_Opened_h": {},
+                      "PBI_Defect_Status": {},
+                      "PBI_Defect_Priority": {},
+                      "PBI_Defect_Reporter": {},
+                      "PBI_Defect_Processor": {},
+                      "PBI_Defect_Created_On": {},
+                      "PBI_Defect_Changed_On": {},
+                      "PBI_Defect_Support_Team": {},
+                      "PBI_Defect_Opened_d": {},
+                      "PBI_Defect_In_Process_d": {},
+                      "PBI_Defect_Customer_Action_d": {},
+                      "PBI_Defect_Proposed_Solution_d": {},
+                      "PBI_Defect_Rejected_d": {},
+                      "PBI_Defect_Wait_for_Transport_d": {},
+                      "PBI_Defect_Wait_for_Parent_d": {},
+                      "ADO_Task_Type": {},
+                      "ADO_End_Actual": {},
+                      "ADO_Primary_Owner": {},
+                      "ADO_Start_Date_Actual": {},
+                      "ADO_End_Date_Actual": {},
+                      "TestResourcesField": {},
+                      "Showstoppers_High_Level_Categorization": {},
+                      "Showstoppers_Country_Impacted": {},
+                      "Showstoppers_Legal_Business_Requirement": {},
+                      "Showstoppers_Required_When": {},
+                      "Showstoppers_Workaround_Y_N": {},
+                      "Showstoppers_Reason_No_Workaround": {},
+                      "Showstoppers_Workaround_Effort": {},
+                      "Showstoppers_Frequency_Volume": {},
+                      "Showstoppers_Issue_Description": {},
+                      "Showstoppers_Impact": {},
+                      "Showstoppers_Next_Action": {},
+                      "Showstoppers_ETA": {},
+                      "Notification": {
+                        "type": "string"
+                      },
+                      "ADO_Defect_Priority": {},
+                      "ADO_ERP_Country": {},
+                      "Planner_ID": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "ProjectId",
+                      "TaskId",
+                      "ParentTaskId",
+                      "ParentTaskName",
+                      "ProjectName",
+                      "TaskActualCost",
+                      "TaskActualDuration",
+                      "TaskActualFinishDate",
+                      "TaskActualFixedCost",
+                      "TaskActualOvertimeCost",
+                      "TaskActualOvertimeWork",
+                      "TaskActualRegularCost",
+                      "TaskActualRegularWork",
+                      "TaskActualStartDate",
+                      "TaskActualWork",
+                      "TaskACWP",
+                      "TaskBCWP",
+                      "TaskBCWS",
+                      "TaskBudgetCost",
+                      "TaskBudgetWork",
+                      "TaskClientUniqueId",
+                      "TaskCost",
+                      "TaskCostVariance",
+                      "TaskCPI",
+                      "TaskCreatedDate",
+                      "TaskCreatedRevisionCounter",
+                      "TaskCV",
+                      "TaskCVP",
+                      "TaskDeadline",
+                      "TaskDeliverableFinishDate",
+                      "TaskDeliverableStartDate",
+                      "TaskDuration",
+                      "TaskDurationIsEstimated",
+                      "TaskDurationString",
+                      "TaskDurationVariance",
+                      "TaskEAC",
+                      "TaskEarlyFinish",
+                      "TaskEarlyStart",
+                      "TaskFinishDate",
+                      "TaskFinishDateString",
+                      "TaskFinishVariance",
+                      "TaskFixedCost",
+                      "TaskFixedCostAssignmentId",
+                      "TaskFreeSlack",
+                      "TaskHyperLinkAddress",
+                      "TaskHyperLinkFriendlyName",
+                      "TaskHyperLinkSubAddress",
+                      "TaskIgnoresResourceCalendar",
+                      "TaskIndex",
+                      "TaskIsActive",
+                      "TaskIsCritical",
+                      "TaskIsEffortDriven",
+                      "TaskIsExternal",
+                      "TaskIsManuallyScheduled",
+                      "TaskIsMarked",
+                      "TaskIsMilestone",
+                      "TaskIsOverallocated",
+                      "TaskIsProjectSummary",
+                      "TaskIsRecurring",
+                      "TaskIsSummary",
+                      "TaskLateFinish",
+                      "TaskLateStart",
+                      "TaskLevelingDelay",
+                      "TaskModifiedDate",
+                      "TaskModifiedRevisionCounter",
+                      "TaskName",
+                      "TaskOutlineLevel",
+                      "TaskOutlineNumber",
+                      "TaskOvertimeCost",
+                      "TaskOvertimeWork",
+                      "TaskPercentCompleted",
+                      "TaskPercentWorkCompleted",
+                      "TaskPhysicalPercentCompleted",
+                      "TaskPriority",
+                      "TaskRegularCost",
+                      "TaskRegularWork",
+                      "TaskRemainingCost",
+                      "TaskRemainingDuration",
+                      "TaskRemainingOvertimeCost",
+                      "TaskRemainingOvertimeWork",
+                      "TaskRemainingRegularCost",
+                      "TaskRemainingRegularWork",
+                      "TaskRemainingWork",
+                      "TaskResourcePlanWork",
+                      "TaskSPI",
+                      "TaskStartDate",
+                      "TaskStartDateString",
+                      "TaskStartVariance",
+                      "TaskStatusManagerUID",
+                      "TaskSV",
+                      "TaskSVP",
+                      "TaskTCPI",
+                      "TaskTotalSlack",
+                      "TaskVAC",
+                      "TaskWBS",
+                      "TaskWork",
+                      "TaskWorkVariance",
+                      "Health",
+                      "FlagStatus",
+                      "Test2",
+                      "Taskfield2Text1",
+                      "WorkItemID",
+                      "ADO_ID",
+                      "ADO_State",
+                      "ADO_BO_ID",
+                      "ADO_Iteration",
+                      "ADO_Area",
+                      "ADO_Start_Baseline",
+                      "ADO_End_Baseline",
+                      "ADO_Responsible",
+                      "PBI_Test_Package",
+                      "PBI_Test_Case_Description",
+                      "PBI_Test_Priority",
+                      "PBI_Test_Status",
+                      "PBI_Test_Changed_On",
+                      "PBI_Test_Changed_By",
+                      "PBI_Test_Open_Defects",
+                      "PBI_Defect_Description",
+                      "PBI_Defect_ID",
+                      "PBI_Defect_Link",
+                      "PBI_Defect_Category",
+                      "PBI_Test_Plan",
+                      "PBI_Test_Link",
+                      "PBI_Defect_KPI",
+                      "PBI_Defect_Opened_h",
+                      "PBI_Defect_Status",
+                      "PBI_Defect_Priority",
+                      "PBI_Defect_Reporter",
+                      "PBI_Defect_Processor",
+                      "PBI_Defect_Created_On",
+                      "PBI_Defect_Changed_On",
+                      "PBI_Defect_Support_Team",
+                      "PBI_Defect_Opened_d",
+                      "PBI_Defect_In_Process_d",
+                      "PBI_Defect_Customer_Action_d",
+                      "PBI_Defect_Proposed_Solution_d",
+                      "PBI_Defect_Rejected_d",
+                      "PBI_Defect_Wait_for_Transport_d",
+                      "PBI_Defect_Wait_for_Parent_d",
+                      "ADO_Task_Type",
+                      "ADO_End_Actual",
+                      "ADO_Primary_Owner",
+                      "ADO_Start_Date_Actual",
+                      "ADO_End_Date_Actual",
+                      "TestResourcesField",
+                      "Showstoppers_High_Level_Categorization",
+                      "Showstoppers_Country_Impacted",
+                      "Showstoppers_Legal_Business_Requirement",
+                      "Showstoppers_Required_When",
+                      "Showstoppers_Workaround_Y_N",
+                      "Showstoppers_Reason_No_Workaround",
+                      "Showstoppers_Workaround_Effort",
+                      "Showstoppers_Frequency_Volume",
+                      "Showstoppers_Issue_Description",
+                      "Showstoppers_Impact",
+                      "Showstoppers_Next_Action",
+                      "Showstoppers_ETA",
+                      "Notification",
+                      "ADO_Defect_Priority",
+                      "ADO_ERP_Country",
+                      "Planner_ID"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Initialize_vADO_ID": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "612807be-8cda-4b7b-a55e-577906df0042"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "vADO_ID",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Apply_to_each": {
+          "foreach": "@body('Parse_JSON_Created_Task')?['value']",
+          "actions": {
+            "Set_variable": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "35043a80-d49f-4f86-adea-c6a8263ca1bc"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "vADO_ID",
+                "value": "@items('Apply_to_each')?['ADO_ID']"
+              }
+            }
+          },
+          "runAfter": {
+            "Apply_to_each_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e43f53cd-6487-492d-ba4c-fc7437da9d45"
+          },
+          "type": "Foreach"
+        },
+        "Apply_to_each_2": {
+          "foreach": "@body('Parse_JSON_Created_Task')?['value']",
+          "actions": {
+            "Checkout_project": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "22fe870b-0a54-4f62-bd50-3511cf3a8854"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "CheckoutProject"
+                },
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@items('Apply_to_each_2')?['ProjectId']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_HTTP_To_Update_Task_Percent_Complete": {
+              "runAfter": {
+                "Checkout_project": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6edbce1a-af3a-4a66-b360-1efc1aded2a1"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "parameters": {
+                  "dataset": "https://basf.sharepoint.com/sites/gb-project-management",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_api/ProjectServer/Projects('@{items('Apply_to_each_2')?['ProjectId']}')/Draft/Tasks('@{items('Apply_to_each_2')?['TaskId']}') ",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "application/json;odata=verbose",
+                    "X-HTTP-Method": "MERGE",
+                    "IF-MATCH": "*"
+                  },
+                  "parameters/body": "{\n  \"__metadata\": {\n    \"type\": \"PS.DraftTask\"\n  },\n  \"PercentComplete\": 100\n}"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Checkin_and_publish_project_2": {
+              "runAfter": {
+                "Send_HTTP_To_Update_Task_Percent_Complete": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c5729afa-8536-46ec-b2ff-09c08adcf509"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "PublishProject"
+                },
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@items('Apply_to_each_2')?['ProjectId']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Parse_JSON_Created_Task": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fe0f597b-03b2-41e5-8e64-527d10f7763b"
+          },
+          "type": "Foreach"
+        },
+        "Initialize_vProjectURL": {
+          "runAfter": {
+            "Initialize_vADO_ID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "612807be-8cda-4b7b-a55e-577906df0042"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "vProjectURL",
+                "type": "string",
+                "value": "https://basf.sharepoint.com/sites/gb-project-management"
+              }
+            ]
+          }
+        },
+        "Condition": {
+          "actions": {
+            "Get_work_item_details": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "0a73d92c-e991-43a4-b970-888f5adf470c"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices",
+                  "connectionName": "shared_visualstudioteamservices",
+                  "operationId": "GetWorkItemDetails"
+                },
+                "parameters": {
+                  "account": "basf4GB",
+                  "project": "GB CP Global Projects",
+                  "typeName": "Task",
+                  "id": "@variables('vADO_ID')"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Update_a_work_item": {
+              "runAfter": {
+                "Get_work_item_details": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "88e74a7c-ca7e-4a8c-8bfc-e405dff837de"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices",
+                  "connectionName": "shared_visualstudioteamservices",
+                  "operationId": "UpdateWorkItem"
+                },
+                "parameters": {
+                  "account": "basf4GB",
+                  "id": "@outputs('Get_work_item_details')?['body/id']",
+                  "project": "GB CP Global Projects",
+                  "type": "Task",
+                  "workItem/dynamicFields/System.State": "Removed"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Apply_to_each": [
+              "Succeeded"
+            ]
+          },
+          "expression": {
+            "equals": [
+              "@empty(variables('vADO_ID'))",
+              false
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fe8882fc-d34d-4720-8eab-9bfb3192fdc3"
+          },
+          "type": "If"
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

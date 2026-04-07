@@ -1,0 +1,217 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedcommondataserviceforapps_da480"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "fe126fa1-dc67-4b74-a45d-0827f3ec0afb"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Perform_an_unbound_action_in_selected_environment": {
+          "runAfter": {
+            "CreateNewProject": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "47e64f15-c870-489f-aa0a-575686469749"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "organization": "https://orga238981b.crm4.dynamics.com",
+              "actionName": "msdyn_CreateOperationSetV1",
+              "item/ProjectId": "69682c38-21bb-f011-bbd3-7c1e5234ef55",
+              "item/Description": "TestNewTask"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "PerformUnboundActionWithOrganization",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          }
+        },
+        "OperationSetId": {
+          "runAfter": {
+            "Perform_an_unbound_action_in_selected_environment": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "41289896-af89-47b9-947f-b14624e9b473"
+          },
+          "type": "Compose",
+          "inputs": "@outputs('Perform_an_unbound_action_in_selected_environment')?['body/OperationSetId']"
+        },
+        "Compose_at_odata_type": {
+          "runAfter": {
+            "OperationSetId": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "10e612aa-7682-4bb9-bddf-bc84ea8df8f8"
+          },
+          "type": "Compose",
+          "inputs": "@@odata.type "
+        },
+        "Perform_an_unbound_action": {
+          "runAfter": {
+            "Create_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "msdyn_PssCreateV1",
+              "item/Entity": {
+                "msdyn_subject": "Parent Task",
+                "msdyn_outlinelevel": 1,
+                "@{outputs('Compose_at_odata_type')}": "Microsoft.Dynamics.CRM.msdyn_projecttask",
+                "msdyn_project@odata.bind": "/msdyn_projects(@{outputs('ProjectId')})",
+                "msdyn_projectbucket@odata.bind": "/msdyn_projectbuckets(@{outputs('ProjectBucketId')})"
+              },
+              "item/OperationSetId": "@outputs('OperationSetId')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          }
+        },
+        "ProjectId": {
+          "runAfter": {
+            "Parse_JSON": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "41289896-af89-47b9-947f-b14624e9b473"
+          },
+          "type": "Compose",
+          "inputs": "@body('CreateNewProject')?['ProjectId']"
+        },
+        "ProjectBucketId": {
+          "runAfter": {
+            "ProjectId": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "41289896-af89-47b9-947f-b14624e9b473"
+          },
+          "type": "Compose",
+          "inputs": "71682c38-21bb-f011-bbd3-7c1e5234ef55"
+        },
+        "CreateNewProject": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "@trim('msdyn_CreateProjectV1')",
+              "item": {
+                "Project": {
+                  "msdyn_subject": "API test project @{utcNow()}",
+                  "msdyn_schedulemode": 192350001,
+                  "msdyn_scheduledstart": "@{utcNow('yyyy-MM-dd')}",
+                  "msdyn_workhourtemplate@odata.bind": "msdyn_workhourtemplates(146f0c1d-62f8-e911-a812-000d3aba6eaf)",
+                  "msdyn_ContractOrganizationalUnitId@odata.bind": "msdyn_organizationalunits(0d6f0c1d-62f8-e911-a812-000d3aba6eaf)",
+                  "msdyn_projectmanager@odata.bind": "systemusers(3684cc27-37cb-ee11-9078-000d3ab775d1)"
+                }
+              }
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          }
+        },
+        "Create_Bucket": {
+          "runAfter": {
+            "ProjectBucketId": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "msdyn_PssCreateV1",
+              "item/Entity": {
+                "msdyn_name": "Schedule API Bucket for proj  ",
+                "@{outputs('Compose_at_odata_type')}": "Microsoft.Dynamics.CRM.msdyn_projectbucket",
+                "msdyn_project@odata.bind": "/msdyn_projects(@{outputs('CreateNewProject')?['body/ProjectId']})"
+              },
+              "item/OperationSetId": "@outputs('OperationSetId')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          }
+        },
+        "Parse_JSON": {
+          "runAfter": {
+            "Compose_at_odata_type": [
+              "Succeeded"
+            ]
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@body('CreateNewProject')",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "@@odata.context": {
+                  "type": "string"
+                },
+                "ProjectId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

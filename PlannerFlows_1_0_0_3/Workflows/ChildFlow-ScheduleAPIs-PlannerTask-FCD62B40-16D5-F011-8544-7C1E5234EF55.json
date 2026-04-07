@@ -1,0 +1,559 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "d2d_sharedcommondataserviceforapps_5c6d9"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "f6aa49ea-e099-4a5d-9e5c-b9e1bdbfae38"
+          },
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "Please enter your input",
+                  "title": "ProjectID",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_1": {
+                  "description": "Please enter your input",
+                  "title": "TaskTitle",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_2": {
+                  "description": "Please enter your input",
+                  "title": "BucketID",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_3": {
+                  "description": "Please enter your input",
+                  "title": "Start",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_4": {
+                  "description": "Please enter your input",
+                  "title": "End",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_5": {
+                  "description": "Please enter your input",
+                  "title": "TaskId",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text",
+                "text_1"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "Call_CreateOperationSetV1": {
+          "runAfter": {
+            "Compose__Start": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "52ca05c4-3907-42b2-b901-437cea041c1b"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "msdyn_CreateOperationSetV1",
+              "item/ProjectId": "@variables('projectID')",
+              "item/Description": "OP set for test proj "
+            },
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "OperationSetId": {
+          "runAfter": {
+            "Call_CreateOperationSetV1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a55ea7af-ade2-4c5d-b992-eee115d80a88"
+          },
+          "type": "Compose",
+          "inputs": "@outputs('Call_CreateOperationSetV1')?['body/OperationSetId']"
+        },
+        "Call_ExecuteOperationSetV1": {
+          "runAfter": {
+            "Call_AbandonOperationSetV1_-_Subtask": [
+              "Skipped"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1794ec31-ad56-4f91-bba9-81edc135de41"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "msdyn_ExecuteOperationSetV1",
+              "item/OperationSetId": "@outputs('OperationSetId')"
+            },
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Compose_at_odata_type": {
+          "runAfter": {
+            "OperationSetId": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "9d258d92-ce15-47c2-aec9-4ba5772d8264"
+          },
+          "type": "Compose",
+          "inputs": "@@odata.type"
+        },
+        "Project_Task_-_Subtask": {
+          "actions": {
+            "Call_PssCreateV1_-_Subtask_1": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "e39bbf8b-9bfe-4e7a-bd39-31f6f52d9db9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "actionName": "msdyn_PssCreateV1",
+                  "item/Entity": "@outputs('ComposeAddFinish')",
+                  "item/OperationSetId": "@outputs('OperationSetId')"
+                },
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "PerformUnboundAction",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "description": "formatDateTime(UtcNow(),'yyyy-MM-ddT07:00:00Z') // addDays(formatDateTime(UtcNow(),'yyyy-MM-ddT15:00:00Z'), 1)"
+            },
+            "Parse_JSON_-_Subtask_1": {
+              "runAfter": {
+                "Call_PssCreateV1_-_Subtask_1": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "271cb342-4216-41ec-8da8-44f45e3e3fdc"
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@outputs('Call_PssCreateV1_-_Subtask_1')?['body/OperationSetResponse']",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "<OperationSetResponses>k__BackingField": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Key": {
+                            "type": "string"
+                          },
+                          "Value": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "Key",
+                          "Value"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Filter_array_-_Subtask_1": {
+              "runAfter": {
+                "Parse_JSON_-_Subtask_1": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "03344de3-147b-4766-b181-e3451fe7f175"
+              },
+              "type": "Query",
+              "inputs": {
+                "from": "@body('Parse_JSON_-_Subtask_1')?['<OperationSetResponses>k__BackingField']",
+                "where": "@equals(item()?['Key'], 'recordId')"
+              }
+            },
+            "msdyn_projecttaskid_-_Subtask_1": {
+              "runAfter": {
+                "Filter_array_-_Subtask_1": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "b7cc4485-7334-42a3-9f2a-b149357fd165"
+              },
+              "type": "Compose",
+              "inputs": "@last(body('Filter_array_-_Subtask_1'))?['value']",
+              "description": "last(body('Filter_array_-_Subtask_1'))?['value']"
+            }
+          },
+          "runAfter": {
+            "ComposeAddFinish": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c45a3d88-bf75-42f4-ac0f-1edccdd4b49b"
+          },
+          "type": "Scope"
+        },
+        "Call_AbandonOperationSetV1_-_Subtask": {
+          "runAfter": {
+            "Project_Task_-_Subtask": [
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "49f61d10-775a-4950-9b53-777897599db9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "msdyn_AbandonOperationSetV1",
+              "item/OperationSetId": "@outputs('OperationSetId')"
+            },
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Delay_-_Persist_to_Dataverse": {
+          "runAfter": {
+            "Call_ExecuteOperationSetV1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4c197eac-d4db-4329-9670-fba1f66c7338"
+          },
+          "type": "Wait",
+          "inputs": {
+            "interval": {
+              "count": 40,
+              "unit": "Second"
+            }
+          },
+          "description": "https://docs.microsoft.com/en-us/dynamics365/project-operations/project-management/project-schedule-api-performance"
+        },
+        "Get_OperationSet": {
+          "runAfter": {
+            "Delay_-_Persist_to_Dataverse": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7bb57697-64d7-4a4d-86af-2891d7c69cc6"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "GetItem",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "msdyn_operationsets",
+              "recordId": "@outputs('OperationSetId')"
+            },
+            "authentication": {
+              "type": "Raw",
+              "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+            }
+          }
+        },
+        "Did_OperationSet_succeed": {
+          "actions": {
+            "PSS_has_persisted_changes_to_Dataverse": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "8d44b72e-13a5-4eb3-b8ec-c4cc6c19fb4c"
+              },
+              "type": "Compose",
+              "inputs": "PSS has persisted changes to Dataverse."
+            }
+          },
+          "runAfter": {
+            "Get_OperationSet": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "Terminate_as_Failed_for_failed_PSS_persist": {
+                "runAfter": {},
+                "metadata": {
+                  "operationMetadataId": "a98e2235-712e-4569-8776-2c49b1f7bb2f"
+                },
+                "type": "Terminate",
+                "inputs": {
+                  "runStatus": "Failed",
+                  "runError": {
+                    "message": "Oops! Something went wrong!"
+                  }
+                }
+              }
+            }
+          },
+          "expression": {
+            "equals": [
+              "@outputs('Get_OperationSet')?['body/msdyn_status']",
+              192350003
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "dfbb86bb-3e6c-41f8-8808-3290e1ca4642"
+          },
+          "type": "If"
+        },
+        "Initialize_variable": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "63d5bdab-c71d-496b-9ffc-53f8a1cdd61a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "projectID",
+                "type": "string",
+                "value": "@triggerBody()?['text']"
+              }
+            ]
+          }
+        },
+        "Respond_to_a_Power_App_or_flow": {
+          "runAfter": {
+            "Did_OperationSet_succeed": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4950bb5f-c937-498b-8f57-311655c8a4bd"
+          },
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "statusCode": 200,
+            "body": {
+              "taskid": "@{outputs('msdyn_projecttaskid_-_Subtask_1')}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "taskid": {
+                  "title": "TaskID",
+                  "x-ms-dynamically-added": true,
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "Compose__Start": {
+          "runAfter": {
+            "Initialize_vTaskBody": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c110a08b-b764-4999-b82d-c15b1c891a21"
+          },
+          "type": "Compose",
+          "inputs": "@if( empty(triggerBody()?['text_3']),'',formatDateTime(triggerBody()?['text_3'], 'yyyy-MM-ddT07:00:00Z'))"
+        },
+        "ComposeAddStart": {
+          "runAfter": {
+            "Condition": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "13c61316-b545-4ecd-ae9c-908ca47f0be7"
+          },
+          "type": "Compose",
+          "inputs": "@if(\r\n  empty(triggerBody()?['text_3']),\r\n  variables('varTaskBody'),\r\n  addProperty(\r\n    variables('varTaskBody'),\r\n    'msdyn_start',\r\n    formatDateTime(triggerBody()?['text_3'], 'yyyy-MM-ddT07:00:00Z')\r\n  )\r\n)"
+        },
+        "ComposeAddFinish": {
+          "runAfter": {
+            "ComposeAddStart": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "45a13548-6e82-4e39-b4fb-889320b22d0f"
+          },
+          "type": "Compose",
+          "inputs": "@if(\r\n  empty(triggerBody()?['text_4']),\r\n  outputs('ComposeAddStart'),\r\n  addProperty(\r\n    outputs('ComposeAddStart'),\r\n    'msdyn_finish',\r\n    formatDateTime(triggerBody()?['text_4'], 'yyyy-MM-ddT15:00:00Z')\r\n  )\r\n)"
+        },
+        "Condition": {
+          "actions": {
+            "Set_variable": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "f7676558-e00e-4c6b-8238-743aec047cd0"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "varTaskBody",
+                "value": "@outputs('ComposeBaseTaskCreate')"
+              }
+            }
+          },
+          "runAfter": {
+            "ComposeBaseTaskUpdate": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "Set_variable_1": {
+                "runAfter": {},
+                "metadata": {
+                  "operationMetadataId": "0e84595f-a405-4eea-a579-6c9359ba5b31"
+                },
+                "type": "SetVariable",
+                "inputs": {
+                  "name": "varTaskBody",
+                  "value": "@outputs('ComposeBaseTaskUpdate')"
+                }
+              }
+            }
+          },
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerBody()?['text_5'])",
+                  true
+                ]
+              }
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "da6068d8-33a4-43b6-8614-57420bae9ef4"
+          },
+          "type": "If"
+        },
+        "Initialize_vTaskBody": {
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "63d5bdab-c71d-496b-9ffc-53f8a1cdd61a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varTaskBody",
+                "type": "object",
+                "value": {}
+              }
+            ]
+          }
+        },
+        "ComposeBaseTaskCreate": {
+          "runAfter": {
+            "Compose_at_odata_type": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a2e4c774-6b7b-4ee4-b90e-9f6f2a444542"
+          },
+          "type": "Compose",
+          "inputs": {
+            "msdyn_subject": "@{triggerBody()?['text_1']}",
+            "msdyn_outlinelevel": 1,
+            "@{outputs('Compose_at_odata_type')}": "Microsoft.Dynamics.CRM.msdyn_projecttask",
+            "msdyn_project@odata.bind": "msdyn_projects(@{variables('projectID')})",
+            "msdyn_projectbucket@odata.bind": "msdyn_projectbuckets(@{triggerBody()?['text_2']})"
+          }
+        },
+        "ComposeBaseTaskUpdate": {
+          "runAfter": {
+            "ComposeBaseTaskCreate": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a7684276-5c99-4ec0-983f-5e671705dca3"
+          },
+          "type": "Compose",
+          "inputs": {
+            "msdyn_subject": "@{triggerBody()?['text_1']}",
+            "@{outputs('Compose_at_odata_type')}": "Microsoft.Dynamics.CRM.msdyn_projecttask",
+            "msdyn_projecttaskid": "@{triggerBody()?['text_5']}"
+          }
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

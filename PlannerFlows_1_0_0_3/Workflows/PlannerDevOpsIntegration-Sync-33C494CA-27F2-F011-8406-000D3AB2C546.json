@@ -1,0 +1,279 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_visualstudioteamservices": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedvisualstudioteamservices_df734"
+        },
+        "api": {
+          "name": "shared_visualstudioteamservices"
+        }
+      },
+      "shared_sharepointonline": {
+        "runtimeSource": "invoker",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "5006c346-e9a1-4bc5-931d-0ccfc071f29d"
+          },
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          },
+          "runtimeConfiguration": {
+            "concurrency": {
+              "runs": 1
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize_vPlannerId": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "56405453-a41a-4744-940e-e72d4da5622a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "vPlannerId",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Respond_to_a_Power_App_or_flow": {
+          "runAfter": {
+            "Apply_to_each": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6811a838-6397-409f-b7b6-153bf4185544"
+          },
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "statusCode": 200,
+            "body": {
+              "output": "Done"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "output": {
+                  "title": "Output",
+                  "x-ms-dynamically-added": true,
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "operationOptions": "Asynchronous"
+        },
+        "Get_query_results": {
+          "runAfter": {
+            "Initialize_vPlannerId": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "adccb149-be5e-4d65-9949-7d08dc9760d0": "My Queries/AP - W2 Mock 1 - 13 Business Partner",
+            "operationMetadataId": "91e57cf8-9f05-4507-a405-24d31f3e6c91"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_visualstudioteamservices",
+              "operationId": "GetQueryResultsV2",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices"
+            },
+            "parameters": {
+              "account": "@triggerBody()?['text_6']",
+              "project": "@triggerBody()?['text']",
+              "queryId": "@triggerBody()?['text_1']"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 50
+            }
+          }
+        },
+        "Parse_JSON": {
+          "runAfter": {
+            "Get_query_results": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "78cd7fb5-9c52-4045-af22-c625b5d9eb3f"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@outputs('Get_query_results')?['body/value']",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "System.Id": {
+                    "type": "integer"
+                  },
+                  "System.AreaPath": {
+                    "type": "string"
+                  },
+                  "System.IterationPath": {
+                    "type": "string"
+                  },
+                  "System.WorkItemType": {
+                    "type": "string"
+                  },
+                  "System.State": {
+                    "type": "string"
+                  },
+                  "System.Title": {
+                    "type": "string"
+                  },
+                  "Custom.Responsible": {
+                    "type": "string"
+                  },
+                  "Custom.BO_ID": {
+                    "type": "string"
+                  },
+                  "Custom.TaskType_DMP": {
+                    "type": "string"
+                  },
+                  "Custom.PrimaryOwner_DMP": {
+                    "type": "string"
+                  },
+                  "Custom.StartDate_Actual": {
+                    "type": "string"
+                  },
+                  "Custom.EndDate_Actual": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "System.Id",
+                  "System.AreaPath",
+                  "System.IterationPath",
+                  "System.WorkItemType",
+                  "System.State",
+                  "System.Title"
+                ]
+              }
+            }
+          }
+        },
+        "Apply_to_each": {
+          "foreach": "@body('Parse_JSON')",
+          "actions": {
+            "Run_a_Child_Flow": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "3a0adbca-8d57-4de0-941c-44995c3a3af7"
+              },
+              "type": "Workflow",
+              "inputs": {
+                "host": {
+                  "workflowReferenceName": "fcd62b40-16d5-f011-8544-7c1e5234ef55"
+                },
+                "body": {
+                  "text": "@triggerBody()['text_3']",
+                  "text_1": "@items('Apply_to_each')['System.Title']",
+                  "text_2": "@triggerBody()['text_4']",
+                  "text_3": "@coalesce(items('Apply_to_each')?['Custom.StartDate_Actual'], '')",
+                  "text_4": "@coalesce(items('Apply_to_each')?['Custom.EndDate_Actual'], '')"
+                }
+              }
+            },
+            "Create_item": {
+              "runAfter": {
+                "Run_a_Child_Flow": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "58cae1a3-f84f-4e46-9312-688e1b491e37"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "PostItem",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
+                },
+                "parameters": {
+                  "dataset": "https://basf.sharepoint.com/sites/ngba-gb-planner-projects",
+                  "table": "f447dc91-5769-4d84-808a-00caa3b94afb",
+                  "item/Title": "@items('Apply_to_each')['System.Title']",
+                  "item/ADO_ID": "@items('Apply_to_each')['System.Id']",
+                  "item/PlannerPlanID": "@triggerBody()['text_3']",
+                  "item/PlannerTaskId": "@body('Run_a_Child_Flow')?['taskid']",
+                  "item/ADO_Area": "@items('Apply_to_each')['System.AreaPath']",
+                  "item/ADO_Iteration": "@items('Apply_to_each')['System.IterationPath']",
+                  "item/ADO_Project": "@triggerBody()['text']",
+                  "item/Start": "@items('Apply_to_each')?['Custom.StartDate_Actual']",
+                  "item/EndDate": "@items('Apply_to_each')?['Custom.EndDate_Actual']",
+                  "item/ADO_BO_ID": "@items('Apply_to_each')?['Custom.BO_ID']",
+                  "item/ADO_Primary_Owner": "@items('Apply_to_each')?['Custom.PrimaryOwner_DMP']",
+                  "item/ADO_State": "@items('Apply_to_each')['System.State']",
+                  "item/ADO_Task_Type": "@items('Apply_to_each')?['Custom.TaskType_DMP']",
+                  "item/ADO_Start_Baseline": "@items('Apply_to_each')?['Custom.StartDate_Plan']",
+                  "item/ADO_End_Baseline": "@items('Apply_to_each')?['Custom.EndDate_Plan']",
+                  "item/ADO_Responsible": "@items('Apply_to_each')?['Custom.Responsible']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Parse_JSON": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "daee41c4-81d5-4b58-8f65-5af6633317bf"
+          },
+          "type": "Foreach"
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}

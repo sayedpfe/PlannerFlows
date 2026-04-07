@@ -1,0 +1,156 @@
+<ImportExportXml version="9.2.26031.175" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26031.175" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26031.00175">
+  <SolutionManifest>
+    <UniqueName>PlannerFlows</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="Planner Flows" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions />
+    <Version>1.0.0.3</Version>
+    <Managed>0</Managed>
+    <Publisher>
+      <UniqueName>Paloma</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="Paloma Larm Hermann" languagecode="1033" />
+      </LocalizedNames>
+      <Descriptions />
+      <EMailAddress xsi:nil="true"></EMailAddress>
+      <SupportingWebsiteUrl xsi:nil="true"></SupportingWebsiteUrl>
+      <CustomizationPrefix>paloma</CustomizationPrefix>
+      <CustomizationOptionValuePrefix>73864</CustomizationOptionValuePrefix>
+      <Addresses>
+        <Address>
+          <AddressNumber>1</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+        <Address>
+          <AddressNumber>2</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+      </Addresses>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="29" id="{065aa695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{075aa695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{085aa695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{095aa695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{33c494ca-27f2-f011-8406-000d3ab2c546}" behavior="0" />
+      <RootComponent type="29" id="{3c5aa695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{5959a695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{5a59a695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{5b59a695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{5c59a695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{6ef1ad8f-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{6ff1ad8f-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{70f1ad8f-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{71f1ad8f-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{840814ab-1dbb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{8de40bad-6307-f111-8407-000d3ab2c546}" behavior="0" />
+      <RootComponent type="29" id="{9d59a695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{a2979af6-7a19-f111-8342-000d3ab2c546}" behavior="0" />
+      <RootComponent type="29" id="{a359a695-09bb-f011-bbd3-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{ac7d2707-12d5-f011-8544-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{b717670b-6719-f111-8342-000d3ab2c546}" behavior="0" />
+      <RootComponent type="29" id="{fcd62b40-16d5-f011-8544-7c1e5234ef55}" behavior="0" />
+      <RootComponent type="29" id="{ffc9cf08-57fb-f011-8406-000d3ab2c546}" behavior="0" />
+      <RootComponent type="300" schemaName="paloma_plannermasterapp_d45a4" behavior="0" />
+    </RootComponents>
+    <MissingDependencies>
+      <MissingDependency>
+        <Required type="1" schemaName="bookableresource" displayName="Bookable Resource" solution="msdynce_Scheduling (9.0.0.0)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="Schedule APIs - Draft Resource Assignment" id="{b717670b-6719-f111-8342-000d3ab2c546}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="msdyn_operationset" displayName="OperationSet" solution="msdyn_ProjectServiceCore_Patch (1.0.163.730)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="Schedule APIs - Draft Resource Assignment" id="{b717670b-6719-f111-8342-000d3ab2c546}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="msdyn_operationset" displayName="OperationSet" solution="msdyn_ProjectServiceCore_Patch (1.0.163.730)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="Child Flow - Schedule APIs - Planner Task" id="{fcd62b40-16d5-f011-8544-7c1e5234ef55}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="msdyn_operationset" displayName="OperationSet" solution="msdyn_ProjectServiceCore_Patch (1.0.163.730)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="Child Flow - Planner Task - Create/Update" id="{ffc9cf08-57fb-f011-8406-000d3ab2c546}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="msdyn_project" displayName="Project" solution="msdyn_ProjectServiceCore (1.0.0.87)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="6 PLANNER (to be finished) - SPList to Planner Premium" id="{3c5aa695-09bb-f011-bbd3-7c1e5234ef55}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="msdyn_projecttask" displayName="Project Task" solution="msdyn_ProjectServiceCore (1.0.0.87)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="6 PLANNER (to be finished) - SPList to Planner Premium" id="{3c5aa695-09bb-f011-bbd3-7c1e5234ef55}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="msdyn_projecttask" displayName="Project Task" solution="msdyn_ProjectServiceCore (1.0.0.87)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="Sync Excel to Planner" id="{8de40bad-6307-f111-8407-000d3ab2c546}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="msdyn_projectteam" displayName="Project Team Member" solution="msdyn_ProjectServiceCore (1.0.0.87)">
+          <package appName="Project Service Core" version="1.0.163.730">msdyn_ProjectServiceCore_Anchor (1.0.163.730)</package>
+        </Required>
+        <Dependent type="29" displayName="Schedule APIs - Draft Resource Assignment" id="{b717670b-6719-f111-8342-000d3ab2c546}" />
+      </MissingDependency>
+    </MissingDependencies>
+  </SolutionManifest>
+</ImportExportXml>

@@ -1,0 +1,1222 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_visualstudioteamservices": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedvisualstudioteamservices_df734"
+        },
+        "api": {
+          "name": "shared_visualstudioteamservices"
+        }
+      },
+      "shared_projectonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedprojectonline_2805b"
+        },
+        "api": {
+          "name": "shared_projectonline"
+        }
+      },
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "When_a_work_item_is_created": {
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "e11e9915-9cbe-4c2a-9d7a-f0d00cdcfb2e"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "account": "basf4AP",
+              "project": "WP2-3 - PH Design-IT Setup",
+              "wiql__System_AreaPath": "WP2-3 - PH Design-IT Setup\\IT Set Up\\01 Book to Report\\01a Financial Accounting",
+              "areaPathComparison": "Equals",
+              "wiql__System_IterationPath": "WP2-3 - PH Design-IT Setup\\Wave 1\\Mock 1",
+              "iterationPathComparison": "Equals",
+              "wiql__System_WorkItemType": "Data Migration POAP"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices",
+              "connectionName": "shared_visualstudioteamservices",
+              "operationId": "OnWorkItemCreatedV2"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "concurrency": {
+              "runs": 1
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize_variable": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "6ac427ed-8b16-458f-beaf-5da446429e04"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "vProjectURL",
+                "type": "string",
+                "value": "https://basf.sharepoint.com/sites/gb-project-management"
+              }
+            ]
+          }
+        },
+        "Initialize_variable_2": {
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c230c88d-843a-4bf3-b28d-c94fa474f6fa"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ProjectID",
+                "type": "string",
+                "value": "5a9173f6-6c77-f011-b51a-00155d188003"
+              }
+            ]
+          }
+        },
+        "Initialize_variable_3": {
+          "runAfter": {
+            "Initialize_variable_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "be32c5b7-e996-4a32-9ba8-9e2214e34419"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "IsCheckedOut",
+                "type": "boolean",
+                "value": true
+              }
+            ]
+          }
+        },
+        "List_project": {
+          "runAfter": {
+            "Initialize_variable_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8bdfe777-bc51-465e-864d-b5b94ef53b23"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "ListProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Set_variable_2": {
+          "runAfter": {
+            "List_project": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e8e55dd-f416-4ab6-925c-3e2d3400846f"
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "IsCheckedOut",
+            "value": "@outputs('List_project')?['body/IsCheckedOut']"
+          }
+        },
+        "Do_until": {
+          "actions": {
+            "Delay_2": {
+              "metadata": {
+                "operationMetadataId": "c44933c1-ba27-4be1-bc31-dd16b590689c"
+              },
+              "type": "Wait",
+              "inputs": {
+                "interval": {
+                  "count": 2,
+                  "unit": "Minute"
+                }
+              }
+            },
+            "List_project_2": {
+              "runAfter": {
+                "Delay_2": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "222dc4e1-0f62-4bfc-ae16-93bf753bc812"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "ListProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Set_variable": {
+              "runAfter": {
+                "List_project_2": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "de08caff-b517-40bb-a2e2-e45a05377dc9"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "IsCheckedOut",
+                "value": "@outputs('List_project_2')?['body/IsCheckedOut']"
+              }
+            }
+          },
+          "runAfter": {
+            "Set_variable_2": [
+              "Succeeded"
+            ]
+          },
+          "expression": "@equals(variables('IsCheckedOut'), false)",
+          "limit": {
+            "count": 60,
+            "timeout": "PT1H"
+          },
+          "metadata": {
+            "operationMetadataId": "6dcabdc0-b42a-49c9-8bd2-62262c92a3da"
+          },
+          "type": "Until"
+        },
+        "Checkout_project": {
+          "runAfter": {
+            "Do_until": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "22fe870b-0a54-4f62-bd50-3511cf3a8854"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "CheckoutProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Create_the_Task-copy": {
+          "runAfter": {
+            "Checkout_project": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6edbce1a-af3a-4a66-b360-1efc1aded2a1"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_api/ProjectServer/Projects('@{variables('ProjectID')}')/Draft/Tasks/Add()",
+              "parameters/headers": {
+                "Accept": "application/json;odata=nometadata",
+                "Content-Type": "application/json"
+              },
+              "parameters/body": "{\n   \"parameters\":\n   {\n      \"Name\": \"@{triggerOutputs()?['body/fields/System_Title']}\"\n\n   }\n}\n\n"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Parse_JSON_Created_Task": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Create_the_Task-copy": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4c958046-7bd1-4818-a8d1-efe52fc6fbb8"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@body('Send_an_HTTP_request_to_Create_the_Task-copy')",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ActualCostWorkPerformed": {
+                  "type": "integer"
+                },
+                "ActualDurationMilliseconds": {
+                  "type": "integer"
+                },
+                "ActualDurationTimeSpan": {
+                  "type": "string"
+                },
+                "ActualOvertimeCost": {
+                  "type": "integer"
+                },
+                "ActualOvertimeWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "ActualOvertimeWorkTimeSpan": {
+                  "type": "string"
+                },
+                "BaselineCost": {
+                  "type": "integer"
+                },
+                "BaselineDurationMilliseconds": {
+                  "type": "integer"
+                },
+                "BaselineDurationTimeSpan": {
+                  "type": "string"
+                },
+                "BaselineFinish": {
+                  "type": "string"
+                },
+                "BaselineStart": {
+                  "type": "string"
+                },
+                "BaselineWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "BaselineWorkTimeSpan": {
+                  "type": "string"
+                },
+                "BudgetCost": {
+                  "type": "integer"
+                },
+                "BudgetedCostWorkPerformed": {
+                  "type": "integer"
+                },
+                "BudgetedCostWorkScheduled": {
+                  "type": "integer"
+                },
+                "CostPerformanceIndex": {
+                  "type": "integer"
+                },
+                "CostVariance": {
+                  "type": "integer"
+                },
+                "CostVarianceAtCompletion": {
+                  "type": "integer"
+                },
+                "CostVariancePercentage": {
+                  "type": "integer"
+                },
+                "Created": {
+                  "type": "string"
+                },
+                "CurrentCostVariance": {
+                  "type": "integer"
+                },
+                "DurationVarianceMilliseconds": {
+                  "type": "integer"
+                },
+                "DurationVarianceTimeSpan": {
+                  "type": "string"
+                },
+                "EarliestFinish": {
+                  "type": "string"
+                },
+                "EarliestStart": {
+                  "type": "string"
+                },
+                "EstimateAtCompletion": {
+                  "type": "integer"
+                },
+                "ExternalProjectUid": {
+                  "type": "string"
+                },
+                "ExternalTaskUid": {
+                  "type": "string"
+                },
+                "FinishSlackMilliseconds": {
+                  "type": "integer"
+                },
+                "FinishSlackTimeSpan": {
+                  "type": "string"
+                },
+                "FinishVarianceMilliseconds": {
+                  "type": "integer"
+                },
+                "FinishVarianceTimeSpan": {
+                  "type": "string"
+                },
+                "FreeSlackMilliseconds": {
+                  "type": "integer"
+                },
+                "FreeSlackTimeSpan": {
+                  "type": "string"
+                },
+                "Id": {
+                  "type": "string"
+                },
+                "IgnoreResourceCalendar": {
+                  "type": "boolean"
+                },
+                "IsCritical": {
+                  "type": "boolean"
+                },
+                "IsDurationEstimate": {
+                  "type": "boolean"
+                },
+                "IsExternalTask": {
+                  "type": "boolean"
+                },
+                "IsOverAllocated": {
+                  "type": "boolean"
+                },
+                "IsRecurring": {
+                  "type": "boolean"
+                },
+                "IsRecurringSummary": {
+                  "type": "boolean"
+                },
+                "IsRolledUp": {
+                  "type": "boolean"
+                },
+                "IsSubProject": {
+                  "type": "boolean"
+                },
+                "IsSubProjectReadOnly": {
+                  "type": "boolean"
+                },
+                "IsSubProjectScheduledFromFinish": {
+                  "type": "boolean"
+                },
+                "IsSummary": {
+                  "type": "boolean"
+                },
+                "LatestFinish": {
+                  "type": "string"
+                },
+                "LatestStart": {
+                  "type": "string"
+                },
+                "LevelingDelayMilliseconds": {
+                  "type": "integer"
+                },
+                "LevelingDelayTimeSpan": {
+                  "type": "string"
+                },
+                "Modified": {
+                  "type": "string"
+                },
+                "Notes": {
+                  "type": "string"
+                },
+                "OvertimeCost": {
+                  "type": "integer"
+                },
+                "OvertimeWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "OvertimeWorkTimeSpan": {
+                  "type": "string"
+                },
+                "PercentWorkComplete": {
+                  "type": "integer"
+                },
+                "PreLevelingFinish": {
+                  "type": "string"
+                },
+                "PreLevelingStart": {
+                  "type": "string"
+                },
+                "RegularWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "RegularWorkTimeSpan": {
+                  "type": "string"
+                },
+                "RemainingCost": {
+                  "type": "integer"
+                },
+                "RemainingOvertimeCost": {
+                  "type": "integer"
+                },
+                "RemainingOvertimeWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "RemainingOvertimeWorkTimeSpan": {
+                  "type": "string"
+                },
+                "RemainingWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "RemainingWorkTimeSpan": {
+                  "type": "string"
+                },
+                "Resume": {
+                  "type": "string"
+                },
+                "ScheduleCostVariance": {
+                  "type": "integer"
+                },
+                "ScheduledDurationMilliseconds": {
+                  "type": "integer"
+                },
+                "ScheduledDurationTimeSpan": {
+                  "type": "string"
+                },
+                "ScheduledFinish": {
+                  "type": "string"
+                },
+                "ScheduledStart": {
+                  "type": "string"
+                },
+                "SchedulePerformanceIndex": {
+                  "type": "integer"
+                },
+                "ScheduleVariancePercentage": {
+                  "type": "integer"
+                },
+                "StartSlackMilliseconds": {
+                  "type": "integer"
+                },
+                "StartSlackTimeSpan": {
+                  "type": "string"
+                },
+                "StartVarianceMilliseconds": {
+                  "type": "integer"
+                },
+                "StartVarianceTimeSpan": {
+                  "type": "string"
+                },
+                "Stop": {
+                  "type": "string"
+                },
+                "ToCompletePerformanceIndex": {
+                  "type": "integer"
+                },
+                "TotalSlackMilliseconds": {
+                  "type": "integer"
+                },
+                "TotalSlackTimeSpan": {
+                  "type": "string"
+                },
+                "WorkVarianceMilliseconds": {
+                  "type": "integer"
+                },
+                "WorkVarianceTimeSpan": {
+                  "type": "string"
+                },
+                "ActualCost": {
+                  "type": "integer"
+                },
+                "ActualFinish": {
+                  "type": "string"
+                },
+                "ActualStart": {
+                  "type": "string"
+                },
+                "ActualWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "ActualWorkTimeSpan": {
+                  "type": "string"
+                },
+                "BudgetWorkMilliseconds": {
+                  "type": "integer"
+                },
+                "BudgetWorkTimeSpan": {
+                  "type": "string"
+                },
+                "Completion": {
+                  "type": "string"
+                },
+                "ConstraintStartEnd": {
+                  "type": "string"
+                },
+                "ConstraintType": {
+                  "type": "integer"
+                },
+                "Cost": {
+                  "type": "integer"
+                },
+                "Deadline": {
+                  "type": "string"
+                },
+                "DurationMilliseconds": {
+                  "type": "integer"
+                },
+                "DurationTimeSpan": {
+                  "type": "string"
+                },
+                "Finish": {
+                  "type": "string"
+                },
+                "FinishText": {
+                  "type": "string"
+                },
+                "FixedCost": {
+                  "type": "integer"
+                },
+                "FixedCostAccrual": {
+                  "type": "integer"
+                },
+                "IsActive": {
+                  "type": "boolean"
+                },
+                "IsEffortDriven": {
+                  "type": "boolean"
+                },
+                "IsLockedByManager": {
+                  "type": "boolean"
+                },
+                "IsManual": {
+                  "type": "boolean"
+                },
+                "IsMarked": {
+                  "type": "boolean"
+                },
+                "IsMilestone": {
+                  "type": "boolean"
+                },
+                "LevelingAdjustsAssignments": {
+                  "type": "boolean"
+                },
+                "LevelingCanSplit": {
+                  "type": "boolean"
+                },
+                "Name": {
+                  "type": "string"
+                },
+                "OutlineLevel": {
+                  "type": "integer"
+                },
+                "PercentComplete": {
+                  "type": "integer"
+                },
+                "PercentPhysicalWorkComplete": {
+                  "type": "integer"
+                },
+                "Priority": {
+                  "type": "integer"
+                },
+                "RemainingDurationMilliseconds": {
+                  "type": "integer"
+                },
+                "RemainingDurationTimeSpan": {
+                  "type": "string"
+                },
+                "Start": {
+                  "type": "string"
+                },
+                "StartText": {
+                  "type": "string"
+                },
+                "TaskType": {
+                  "type": "integer"
+                },
+                "UsePercentPhysicalWorkComplete": {
+                  "type": "boolean"
+                },
+                "WorkMilliseconds": {
+                  "type": "integer"
+                },
+                "WorkTimeSpan": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "Checkin_and_publish_project": {
+          "runAfter": {
+            "Parse_JSON_Created_Task": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c5729afa-8536-46ec-b2ff-09c08adcf509"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "PublishProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "List_project_3": {
+          "runAfter": {
+            "Checkin_and_publish_project": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8bdfe777-bc51-465e-864d-b5b94ef53b23"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "ListProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Set_variable_3": {
+          "runAfter": {
+            "List_project_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e8e55dd-f416-4ab6-925c-3e2d3400846f"
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "IsCheckedOut",
+            "value": "@outputs('List_project_3')?['body/IsCheckedOut']"
+          }
+        },
+        "Do_until_2": {
+          "actions": {
+            "Delay_3": {
+              "metadata": {
+                "operationMetadataId": "c44933c1-ba27-4be1-bc31-dd16b590689c"
+              },
+              "type": "Wait",
+              "inputs": {
+                "interval": {
+                  "count": 2,
+                  "unit": "Minute"
+                }
+              }
+            },
+            "List_project_4": {
+              "runAfter": {
+                "Delay_3": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "222dc4e1-0f62-4bfc-ae16-93bf753bc812"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "ListProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Set_variable_4": {
+              "runAfter": {
+                "List_project_4": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "de08caff-b517-40bb-a2e2-e45a05377dc9"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "IsCheckedOut",
+                "value": "@outputs('List_project_4')?['body/IsCheckedOut']"
+              }
+            }
+          },
+          "runAfter": {
+            "Set_variable_3": [
+              "Succeeded"
+            ]
+          },
+          "expression": "@equals(variables('IsCheckedOut'), false)",
+          "limit": {
+            "count": 60,
+            "timeout": "PT1H"
+          },
+          "metadata": {
+            "operationMetadataId": "6dcabdc0-b42a-49c9-8bd2-62262c92a3da"
+          },
+          "type": "Until"
+        },
+        "Checkout_project_2": {
+          "runAfter": {
+            "Do_until_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "22fe870b-0a54-4f62-bd50-3511cf3a8854"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "CheckoutProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_ID": {
+          "runAfter": {
+            "Checkout_project_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_0acc17a8-b52c-f011-8192-00155d18dd04</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/id']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_UpdateADO_Iteration": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_ID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_795db4f5-b52c-f011-8196-00155d187310</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/System_IterationPath']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_Area": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_UpdateADO_Iteration": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_cf61eeff-b52c-f011-8197-00155d183b0b</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/System_AreaPath']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_BO_ID": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_Area": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_150bdcd6-b52c-f011-8197-00155d183b0b</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_BO_ID']}</Parameter>\n\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_End_Baseline": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_BO_ID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_c694f32f-b62c-f011-8197-00155d185d16</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_EndDate_Baseline']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_Responsible": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_End_Baseline": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_18e8b33e-b62c-f011-8197-00155d183b0b</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_Responsible']}</Parameter>\n\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_Start_Baseline": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_Responsible": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_639bfa1e-b62c-f011-8196-00155d18bb09</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_StartDate_Baseline']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_State": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_Start_Baseline": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_8a1194bc-b52c-f011-8197-00155d185d16</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/System_State']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_Actual_Start_Date": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_State": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_ead38158-3250-f011-aa68-00155d48100d</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_StartDate_Actual']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_Actual_End_Date": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_Actual_Start_Date": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_eb9d1366-3250-f011-aa68-00155d48100d</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_EndDate_Actual']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_Task_Type": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_Actual_End_Date": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_ca88a846-694b-f011-b03d-00155d188d13</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_TaskType_DMP']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Send_an_HTTP_request_to_Update_ADO_Primary_Owner": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_Task_Type": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "@variables('vProjectURL')",
+              "parameters/method": "POST",
+              "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=verbose",
+                "Content-Type": "text/xml"
+              },
+              "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_a83ad53c-6a4b-f011-b02f-00155d18e108</Parameter> \n <Parameter Type=\"String\">@{triggerOutputs()?['body/fields/Custom_PrimaryOwner_DMP']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Checkin_and_publish_project_2": {
+          "runAfter": {
+            "Send_an_HTTP_request_to_Update_ADO_Primary_Owner": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c5729afa-8536-46ec-b2ff-09c08adcf509"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "PublishProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

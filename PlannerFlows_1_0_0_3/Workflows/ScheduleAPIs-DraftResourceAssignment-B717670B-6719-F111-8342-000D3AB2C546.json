@@ -1,0 +1,441 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedcommondataserviceforapps_da480"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_commondataserviceforapps": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "d2d_sharedcommondataserviceforapps_5c6d9"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "Please enter your input",
+                  "title": "ProjectID",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_1": {
+                  "description": "Please enter your input",
+                  "title": "TaskID",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_2": {
+                  "description": "Please enter your input",
+                  "title": "Resource",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text_2"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "f6aa49ea-e099-4a5d-9e5c-b9e1bdbfae38"
+          }
+        }
+      },
+      "actions": {
+        "List_Users": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "systemusers",
+              "$filter": "internalemailaddress eq '@{triggerBody()?['text_2']}'"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          }
+        },
+        "For_each": {
+          "type": "Foreach",
+          "foreach": "@outputs('List_Users')?['body/value']",
+          "actions": {
+            "List_Resources": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "bookableresources",
+                  "$filter": "_userid_value eq @{item()?['systemuserid']}"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "For_each_1": {
+              "type": "Foreach",
+              "foreach": "@outputs('List_Resources')?['body/value']",
+              "actions": {
+                "List_Team_Member": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "msdyn_projectteams",
+                      "$filter": "_msdyn_project_value eq '@{triggerBody()?['text']}' and _msdyn_bookableresourceid_value eq '@{items('For_each_1')?['bookableresourceid']}'"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "ListRecords",
+                      "connectionName": "shared_commondataserviceforapps-1"
+                    }
+                  }
+                },
+                "Condition": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "greater": [
+                          "@length(outputs('List_Team_Member')?['body/value'])",
+                          0
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "For_each_2": {
+                      "type": "Foreach",
+                      "foreach": "@outputs('List_Team_Member')?['body/value']",
+                      "actions": {
+                        "Set_variable": {
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "teammemberid",
+                            "value": "@items('For_each_2')?['msdyn_projectteamid']"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Perform_an_unbound_action": {
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "actionName": "@trim('msdyn_CreateTeamMemberV1')",
+                            "item": {
+                              "TeamMember": {
+                                "@{outputs('Compose_at_odata_type_2')}": "Microsoft.Dynamics.CRM.msdyn_projectteam",
+                                "msdyn_projectteamid": "@{guid()}",
+                                "msdyn_name": "@{items('For_each_1')?['name']}",
+                                "msdyn_project@odata.bind": "msdyn_projects(@{triggerBody()?['text']})",
+                                "msdyn_bookableresourceid@odata.bind": "bookableresources(@{items('For_each_1')?['bookableresourceid']})"
+                              }
+                            }
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "operationId": "PerformUnboundAction",
+                            "connectionName": "shared_commondataserviceforapps-1"
+                          }
+                        },
+                        "runAfter": {
+                          "Compose_at_odata_type_2": [
+                            "Succeeded"
+                          ]
+                        }
+                      },
+                      "Compose_at_odata_type_2": {
+                        "type": "Compose",
+                        "inputs": "@@odata.type",
+                        "metadata": {
+                          "operationMetadataId": "9d258d92-ce15-47c2-aec9-4ba5772d8264"
+                        }
+                      },
+                      "Set_variable_1": {
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "teammemberid",
+                          "value": "@body('Perform_an_unbound_action')?['TeamMemberId']"
+                        },
+                        "runAfter": {
+                          "Perform_an_unbound_action": [
+                            "Succeeded"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "List_Team_Member": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Call_CreateOperationSetV1": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "actionName": "msdyn_CreateOperationSetV1",
+                      "item/ProjectId": "@triggerBody()?['text']",
+                      "item/Description": "OP set for test proj "
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "PerformUnboundAction",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  },
+                  "runAfter": {
+                    "Condition": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "52ca05c4-3907-42b2-b901-437cea041c1b"
+                  }
+                },
+                "OperationSetId": {
+                  "type": "Compose",
+                  "inputs": "@outputs('Call_CreateOperationSetV1')?['body/OperationSetId']",
+                  "runAfter": {
+                    "Call_CreateOperationSetV1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "a55ea7af-ade2-4c5d-b992-eee115d80a88"
+                  }
+                },
+                "Compose_at_odata_type": {
+                  "type": "Compose",
+                  "inputs": "@@odata.type",
+                  "runAfter": {
+                    "OperationSetId": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "9d258d92-ce15-47c2-aec9-4ba5772d8264"
+                  }
+                },
+                "Resource_Assignment": {
+                  "type": "Scope",
+                  "actions": {
+                    "Call_PssCreateV1_-_Resource_Assignment_1": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "actionName": "msdyn_PssCreateV1",
+                          "item/Entity": {
+                            "msdyn_name": "API test",
+                            "@{outputs('Compose_at_odata_type')}": "Microsoft.Dynamics.CRM.msdyn_resourceassignment",
+                            "msdyn_projectid@odata.bind": "msdyn_projects(@{triggerBody()?['text']})",
+                            "msdyn_projectteamid@odata.bind": "msdyn_projectteams(@{variables('teammemberid')})",
+                            "msdyn_taskid@odata.bind": "msdyn_projecttasks(@{triggerBody()?['text_1']})"
+                          },
+                          "item/OperationSetId": "@outputs('OperationSetId')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "PerformUnboundAction",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      },
+                      "metadata": {
+                        "operationMetadataId": "9918f36d-b6b5-4977-b08b-227e11c6715e"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Compose_at_odata_type": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "4f822bf3-a5e6-4a80-b602-9dd7d7cbdf13"
+                  }
+                },
+                "Call_AbandonOperationSetV1_-_Resource_Assignment": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "actionName": "msdyn_AbandonOperationSetV1",
+                      "item/OperationSetId": "@outputs('OperationSetId')"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "PerformUnboundAction",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  },
+                  "runAfter": {
+                    "Resource_Assignment": [
+                      "Failed"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "49f61d10-775a-4950-9b53-777897599db9"
+                  }
+                },
+                "Call_ExecuteOperationSetV1": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "actionName": "msdyn_ExecuteOperationSetV1",
+                      "item/OperationSetId": "@outputs('OperationSetId')"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "PerformUnboundAction",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  },
+                  "runAfter": {
+                    "Call_AbandonOperationSetV1_-_Resource_Assignment": [
+                      "Skipped"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "1794ec31-ad56-4f91-bba9-81edc135de41"
+                  }
+                },
+                "Delay_-_Persist_to_Dataverse": {
+                  "type": "Wait",
+                  "description": "https://docs.microsoft.com/en-us/dynamics365/project-operations/project-management/project-schedule-api-performance",
+                  "inputs": {
+                    "interval": {
+                      "count": 40,
+                      "unit": "Second"
+                    }
+                  },
+                  "runAfter": {
+                    "Call_ExecuteOperationSetV1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "4c197eac-d4db-4329-9670-fba1f66c7338"
+                  }
+                },
+                "Get_OperationSet": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "msdyn_operationsets",
+                      "recordId": "@outputs('OperationSetId')"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "GetItem",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  },
+                  "runAfter": {
+                    "Delay_-_Persist_to_Dataverse": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "7bb57697-64d7-4a4d-86af-2891d7c69cc6"
+                  }
+                }
+              },
+              "runAfter": {
+                "List_Resources": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "runAfter": {
+            "List_Users": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Initialize_variable": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "teammemberid",
+                "type": "string"
+              }
+            ]
+          },
+          "runAfter": {}
+        },
+        "Respond_to_a_Power_App_or_flow": {
+          "type": "Response",
+          "kind": "PowerApp",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "output": {
+                  "title": "Output",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "additionalProperties": {}
+            },
+            "statusCode": 200,
+            "body": {
+              "output": "\"Done\""
+            }
+          },
+          "runAfter": {
+            "For_each": [
+              "SUCCEEDED"
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

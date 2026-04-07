@@ -1,0 +1,1946 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_powerbi": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedpowerbi_b72bf"
+        },
+        "api": {
+          "name": "shared_powerbi"
+        }
+      },
+      "shared_projectonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedprojectonline_2805b"
+        },
+        "api": {
+          "name": "shared_projectonline"
+        }
+      },
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "paloma_sharedsharepointonline_8e59f"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2025-09-16T23:00:00Z",
+            "schedule": {
+              "hours": [
+                "3",
+                "13"
+              ]
+            }
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2025-09-16T23:00:00Z",
+            "schedule": {
+              "hours": [
+                "3",
+                "13"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "3a300d1c-d200-4305-94b2-dee94ffb46e1"
+          },
+          "type": "Recurrence",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "runs": 1
+            }
+          }
+        }
+      },
+      "actions": {
+        "Run_a_query_against_a_dataset": {
+          "runAfter": {
+            "List_project_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "21c98aa9-4d12-4fcb-96a1-adbf3a268ad4"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "groupid": "5aec513b-18bc-4427-9368-2898a9920831",
+              "datasetid": "9169fea7-8047-4ac6-bc50-8d20fe703bbe",
+              "specification/query": "DEFINE\n    VAR __DS0FilterTable = \n        TREATAS({\"Error\"}, 'NGBA Test Cases'[Real Status])\n\n    VAR __DS0FilterTable2 = \n        TREATAS({\"GB\"}, 'NGBA Test Cases'[Business Unit])\n\n    VAR __ValueFilterDM0 = \n        FILTER(\n            KEEPFILTERS(\n                SUMMARIZECOLUMNS(\n                    'NGBA Test Cases'[Test Case Description],\n                    'NGBA Test Cases'[Test_Plan],\n                    'NGBA Test Cases'[Test Package ID],\n                    'NGBA Test Cases'[Priority],\n                    'NGBA Test Cases'[Testcase Display URL],\n                    'NGBA Test Cases'[Real Status],\n                    'NGBA Test Cases'[Overall Changed On Text],\n                    'NGBA Test Cases'[Overall Changed By],\n                    __DS0FilterTable,\n                    __DS0FilterTable2,\n                    \"RemainingDefects\", 'NGBA Defects'[RemainingDefects],\n                    \"MinReal_Status\", IGNORE(CALCULATE(MIN('NGBA Test Cases'[Real Status])))\n                )\n            ),\n            [RemainingDefects] = 0\n        )\n\n    VAR __DS0Core = \n        SUMMARIZECOLUMNS(\n            'NGBA Test Cases'[Test Case Description],\n            'NGBA Test Cases'[Test_Plan],\n            'NGBA Test Cases'[Test Package ID],\n            'NGBA Test Cases'[Priority],\n            'NGBA Test Cases'[Testcase Display URL],\n            'NGBA Test Cases'[Real Status],\n            'NGBA Test Cases'[Overall Changed On Text],\n            'NGBA Test Cases'[Overall Changed By],\n            __DS0FilterTable,\n            __DS0FilterTable2,\n            __ValueFilterDM0,\n            \"RemainingDefects\", 'NGBA Defects'[RemainingDefects],\n            \"MinReal_Status\", IGNORE(CALCULATE(MIN('NGBA Test Cases'[Real Status])))\n        )\n\nEVALUATE\n    __DS0Core\n\nORDER BY\n    'NGBA Test Cases'[Test Case Description] DESC,\n    'NGBA Test Cases'[Test_Plan],\n    'NGBA Test Cases'[Test Package ID],\n    'NGBA Test Cases'[Priority],\n    'NGBA Test Cases'[Testcase Display URL],\n    'NGBA Test Cases'[Real Status],\n    'NGBA Test Cases'[Overall Changed On Text],\n    'NGBA Test Cases'[Overall Changed By]\n",
+              "specification/serializerSettings/includeNulls": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerbi",
+              "connectionName": "shared_powerbi",
+              "operationId": "ExecuteDatasetQuery"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Compose": {
+          "runAfter": {
+            "Run_a_query_against_a_dataset": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "06ea5f0b-6499-44ec-96ad-3faed7ed383e"
+          },
+          "type": "Compose",
+          "inputs": "@outputs('Run_a_query_against_a_dataset')?['body/firstTableRows']"
+        },
+        "Parse_JSON": {
+          "runAfter": {
+            "Compose": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e60ed3bf-2872-4ab1-acb4-43783197d37e"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@outputs('Run_a_query_against_a_dataset')?['body/firstTableRows']",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "NGBA Test Cases[Test Case Description]": {
+                    "type": "string"
+                  },
+                  "NGBA Test Cases[Test_Plan]": {
+                    "type": "string"
+                  },
+                  "NGBA Test Cases[Test Package ID]": {
+                    "type": "string"
+                  },
+                  "NGBA Test Cases[Priority]": {
+                    "type": "string"
+                  },
+                  "NGBA Test Cases[Testcase Display URL]": {
+                    "type": "string"
+                  },
+                  "NGBA Test Cases[Real Status]": {
+                    "type": "string"
+                  },
+                  "NGBA Test Cases[Overall Changed On Text]": {
+                    "type": "string"
+                  },
+                  "NGBA Test Cases[Overall Changed By]": {
+                    "type": "string"
+                  },
+                  "[RemainingDefects]": {
+                    "type": "integer"
+                  },
+                  "[MinReal_Status]": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "NGBA Test Cases[Test Case Description]",
+                  "NGBA Test Cases[Test_Plan]",
+                  "NGBA Test Cases[Test Package ID]",
+                  "NGBA Test Cases[Priority]",
+                  "NGBA Test Cases[Testcase Display URL]",
+                  "NGBA Test Cases[Real Status]",
+                  "NGBA Test Cases[Overall Changed On Text]",
+                  "NGBA Test Cases[Overall Changed By]",
+                  "[RemainingDefects]",
+                  "[MinReal_Status]"
+                ]
+              }
+            }
+          }
+        },
+        "Initialize_variable": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "6ac427ed-8b16-458f-beaf-5da446429e04"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "vProjectURL",
+                "type": "string",
+                "value": "https://basf.sharepoint.com/sites/gb-project-management"
+              }
+            ]
+          }
+        },
+        "Initialize_variable_2": {
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c230c88d-843a-4bf3-b28d-c94fa474f6fa"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ProjectID",
+                "type": "string",
+                "value": "e1fc6ed4-f996-f011-ad65-00155d486f0b"
+              }
+            ]
+          }
+        },
+        "Initialize_variable_3": {
+          "runAfter": {
+            "Initialize_variable_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f482f88b-951d-46e8-bcd9-51967236f55e"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "IsCheckedOut",
+                "type": "boolean"
+              }
+            ]
+          }
+        },
+        "List_project_3": {
+          "runAfter": {
+            "Initialize_variable_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8bdfe777-bc51-465e-864d-b5b94ef53b23"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "ListProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Set_IsCheckedOut": {
+          "runAfter": {
+            "Parse_JSON": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e8e55dd-f416-4ab6-925c-3e2d3400846f"
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "IsCheckedOut",
+            "value": "@outputs('List_project_3')?['body/IsCheckedOut']"
+          }
+        },
+        "Do_until_2": {
+          "actions": {
+            "Delay_3": {
+              "metadata": {
+                "operationMetadataId": "c44933c1-ba27-4be1-bc31-dd16b590689c"
+              },
+              "type": "Wait",
+              "inputs": {
+                "interval": {
+                  "count": 1,
+                  "unit": "Minute"
+                }
+              }
+            },
+            "List_project_4": {
+              "runAfter": {
+                "Delay_3": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "222dc4e1-0f62-4bfc-ae16-93bf753bc812"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "ListProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Set_variable_4": {
+              "runAfter": {
+                "List_project_4": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "de08caff-b517-40bb-a2e2-e45a05377dc9"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "IsCheckedOut",
+                "value": "@outputs('List_project_4')?['body/IsCheckedOut']"
+              }
+            }
+          },
+          "runAfter": {
+            "Set_IsCheckedOut": [
+              "Succeeded"
+            ]
+          },
+          "expression": "@equals(variables('IsCheckedOut'), false)",
+          "limit": {
+            "count": 60,
+            "timeout": "PT1H"
+          },
+          "metadata": {
+            "operationMetadataId": "6dcabdc0-b42a-49c9-8bd2-62262c92a3da"
+          },
+          "type": "Until"
+        },
+        "Checkout_the_Project_before_Creating_the_Task": {
+          "runAfter": {
+            "Do_until_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "22fe870b-0a54-4f62-bd50-3511cf3a8854"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "CheckoutProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Apply_to_each": {
+          "foreach": "@body('Parse_JSON')",
+          "actions": {
+            "Parse_JSON_Created_Task_2": {
+              "runAfter": {
+                "Send_HTTP_To_Create_New_Task": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "4c958046-7bd1-4818-a8d1-efe52fc6fbb8"
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('Send_HTTP_To_Create_New_Task')",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ActualCostWorkPerformed": {
+                      "type": "integer"
+                    },
+                    "ActualDurationMilliseconds": {
+                      "type": "integer"
+                    },
+                    "ActualDurationTimeSpan": {
+                      "type": "string"
+                    },
+                    "ActualOvertimeCost": {
+                      "type": "integer"
+                    },
+                    "ActualOvertimeWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "ActualOvertimeWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "BaselineCost": {
+                      "type": "integer"
+                    },
+                    "BaselineDurationMilliseconds": {
+                      "type": "integer"
+                    },
+                    "BaselineDurationTimeSpan": {
+                      "type": "string"
+                    },
+                    "BaselineFinish": {
+                      "type": "string"
+                    },
+                    "BaselineStart": {
+                      "type": "string"
+                    },
+                    "BaselineWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "BaselineWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "BudgetCost": {
+                      "type": "integer"
+                    },
+                    "BudgetedCostWorkPerformed": {
+                      "type": "integer"
+                    },
+                    "BudgetedCostWorkScheduled": {
+                      "type": "integer"
+                    },
+                    "CostPerformanceIndex": {
+                      "type": "integer"
+                    },
+                    "CostVariance": {
+                      "type": "integer"
+                    },
+                    "CostVarianceAtCompletion": {
+                      "type": "integer"
+                    },
+                    "CostVariancePercentage": {
+                      "type": "integer"
+                    },
+                    "Created": {
+                      "type": "string"
+                    },
+                    "CurrentCostVariance": {
+                      "type": "integer"
+                    },
+                    "DurationVarianceMilliseconds": {
+                      "type": "integer"
+                    },
+                    "DurationVarianceTimeSpan": {
+                      "type": "string"
+                    },
+                    "EarliestFinish": {
+                      "type": "string"
+                    },
+                    "EarliestStart": {
+                      "type": "string"
+                    },
+                    "EstimateAtCompletion": {
+                      "type": "integer"
+                    },
+                    "ExternalProjectUid": {
+                      "type": "string"
+                    },
+                    "ExternalTaskUid": {
+                      "type": "string"
+                    },
+                    "FinishSlackMilliseconds": {
+                      "type": "integer"
+                    },
+                    "FinishSlackTimeSpan": {
+                      "type": "string"
+                    },
+                    "FinishVarianceMilliseconds": {
+                      "type": "integer"
+                    },
+                    "FinishVarianceTimeSpan": {
+                      "type": "string"
+                    },
+                    "FreeSlackMilliseconds": {
+                      "type": "integer"
+                    },
+                    "FreeSlackTimeSpan": {
+                      "type": "string"
+                    },
+                    "Id": {
+                      "type": "string"
+                    },
+                    "IgnoreResourceCalendar": {
+                      "type": "boolean"
+                    },
+                    "IsCritical": {
+                      "type": "boolean"
+                    },
+                    "IsDurationEstimate": {
+                      "type": "boolean"
+                    },
+                    "IsExternalTask": {
+                      "type": "boolean"
+                    },
+                    "IsOverAllocated": {
+                      "type": "boolean"
+                    },
+                    "IsRecurring": {
+                      "type": "boolean"
+                    },
+                    "IsRecurringSummary": {
+                      "type": "boolean"
+                    },
+                    "IsRolledUp": {
+                      "type": "boolean"
+                    },
+                    "IsSubProject": {
+                      "type": "boolean"
+                    },
+                    "IsSubProjectReadOnly": {
+                      "type": "boolean"
+                    },
+                    "IsSubProjectScheduledFromFinish": {
+                      "type": "boolean"
+                    },
+                    "IsSummary": {
+                      "type": "boolean"
+                    },
+                    "LatestFinish": {
+                      "type": "string"
+                    },
+                    "LatestStart": {
+                      "type": "string"
+                    },
+                    "LevelingDelayMilliseconds": {
+                      "type": "integer"
+                    },
+                    "LevelingDelayTimeSpan": {
+                      "type": "string"
+                    },
+                    "Modified": {
+                      "type": "string"
+                    },
+                    "Notes": {
+                      "type": "string"
+                    },
+                    "OvertimeCost": {
+                      "type": "integer"
+                    },
+                    "OvertimeWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "OvertimeWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "PercentWorkComplete": {
+                      "type": "integer"
+                    },
+                    "PreLevelingFinish": {
+                      "type": "string"
+                    },
+                    "PreLevelingStart": {
+                      "type": "string"
+                    },
+                    "RegularWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "RegularWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "RemainingCost": {
+                      "type": "integer"
+                    },
+                    "RemainingOvertimeCost": {
+                      "type": "integer"
+                    },
+                    "RemainingOvertimeWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "RemainingOvertimeWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "RemainingWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "RemainingWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "Resume": {
+                      "type": "string"
+                    },
+                    "ScheduleCostVariance": {
+                      "type": "integer"
+                    },
+                    "ScheduledDurationMilliseconds": {
+                      "type": "integer"
+                    },
+                    "ScheduledDurationTimeSpan": {
+                      "type": "string"
+                    },
+                    "ScheduledFinish": {
+                      "type": "string"
+                    },
+                    "ScheduledStart": {
+                      "type": "string"
+                    },
+                    "SchedulePerformanceIndex": {
+                      "type": "integer"
+                    },
+                    "ScheduleVariancePercentage": {
+                      "type": "integer"
+                    },
+                    "StartSlackMilliseconds": {
+                      "type": "integer"
+                    },
+                    "StartSlackTimeSpan": {
+                      "type": "string"
+                    },
+                    "StartVarianceMilliseconds": {
+                      "type": "integer"
+                    },
+                    "StartVarianceTimeSpan": {
+                      "type": "string"
+                    },
+                    "Stop": {
+                      "type": "string"
+                    },
+                    "ToCompletePerformanceIndex": {
+                      "type": "integer"
+                    },
+                    "TotalSlackMilliseconds": {
+                      "type": "integer"
+                    },
+                    "TotalSlackTimeSpan": {
+                      "type": "string"
+                    },
+                    "WorkVarianceMilliseconds": {
+                      "type": "integer"
+                    },
+                    "WorkVarianceTimeSpan": {
+                      "type": "string"
+                    },
+                    "ActualCost": {
+                      "type": "integer"
+                    },
+                    "ActualFinish": {
+                      "type": "string"
+                    },
+                    "ActualStart": {
+                      "type": "string"
+                    },
+                    "ActualWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "ActualWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "BudgetWorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "BudgetWorkTimeSpan": {
+                      "type": "string"
+                    },
+                    "Completion": {
+                      "type": "string"
+                    },
+                    "ConstraintStartEnd": {
+                      "type": "string"
+                    },
+                    "ConstraintType": {
+                      "type": "integer"
+                    },
+                    "Cost": {
+                      "type": "integer"
+                    },
+                    "Deadline": {
+                      "type": "string"
+                    },
+                    "DurationMilliseconds": {
+                      "type": "integer"
+                    },
+                    "DurationTimeSpan": {
+                      "type": "string"
+                    },
+                    "Finish": {
+                      "type": "string"
+                    },
+                    "FinishText": {
+                      "type": "string"
+                    },
+                    "FixedCost": {
+                      "type": "integer"
+                    },
+                    "FixedCostAccrual": {
+                      "type": "integer"
+                    },
+                    "IsActive": {
+                      "type": "boolean"
+                    },
+                    "IsEffortDriven": {
+                      "type": "boolean"
+                    },
+                    "IsLockedByManager": {
+                      "type": "boolean"
+                    },
+                    "IsManual": {
+                      "type": "boolean"
+                    },
+                    "IsMarked": {
+                      "type": "boolean"
+                    },
+                    "IsMilestone": {
+                      "type": "boolean"
+                    },
+                    "LevelingAdjustsAssignments": {
+                      "type": "boolean"
+                    },
+                    "LevelingCanSplit": {
+                      "type": "boolean"
+                    },
+                    "Name": {
+                      "type": "string"
+                    },
+                    "OutlineLevel": {
+                      "type": "integer"
+                    },
+                    "PercentComplete": {
+                      "type": "integer"
+                    },
+                    "PercentPhysicalWorkComplete": {
+                      "type": "integer"
+                    },
+                    "Priority": {
+                      "type": "integer"
+                    },
+                    "RemainingDurationMilliseconds": {
+                      "type": "integer"
+                    },
+                    "RemainingDurationTimeSpan": {
+                      "type": "string"
+                    },
+                    "Start": {
+                      "type": "string"
+                    },
+                    "StartText": {
+                      "type": "string"
+                    },
+                    "TaskType": {
+                      "type": "integer"
+                    },
+                    "UsePercentPhysicalWorkComplete": {
+                      "type": "boolean"
+                    },
+                    "WorkMilliseconds": {
+                      "type": "integer"
+                    },
+                    "WorkTimeSpan": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Plan": {
+              "runAfter": {
+                "Checkout_project_before_updating_Custom_Fields": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_8a40c6d5-9247-f011-b028-00155d48380b</Parameter> \n <Parameter Type=\"String\">@{items('Apply_to_each')['NGBA Test Cases[Test_Plan]']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_HTTP_To_Create_New_Task": {
+              "runAfter": {
+                "Checkout_project": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6edbce1a-af3a-4a66-b360-1efc1aded2a1"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_api/ProjectServer/Projects('@{variables('ProjectID')}')/Draft/Tasks/Add()",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=nometadata",
+                    "Content-Type": "application/json"
+                  },
+                  "parameters/body": "{\n   \"parameters\":\n   {\n      \"Name\": \"@{items('Apply_to_each')['NGBA Test Cases[Test Case Description]']}\"\n\n   }\n}\n\n"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Checkin_and_publish_project_2": {
+              "runAfter": {
+                "Parse_JSON_Created_Task_2": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c5729afa-8536-46ec-b2ff-09c08adcf509"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "PublishProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "List_project_to_update_custom_Fields": {
+              "runAfter": {
+                "Checkin_and_publish_project_2": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "8bdfe777-bc51-465e-864d-b5b94ef53b23"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "ListProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Set_IsCheckedOut_before_updating_Custom_Fields": {
+              "runAfter": {
+                "List_project_to_update_custom_Fields": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e8e55dd-f416-4ab6-925c-3e2d3400846f"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "IsCheckedOut",
+                "value": "@outputs('List_project_to_update_custom_Fields')?['body/IsCheckedOut']"
+              }
+            },
+            "Do_until_3": {
+              "actions": {
+                "Delay_4": {
+                  "metadata": {
+                    "operationMetadataId": "c44933c1-ba27-4be1-bc31-dd16b590689c"
+                  },
+                  "type": "Wait",
+                  "inputs": {
+                    "interval": {
+                      "count": 15,
+                      "unit": "Second"
+                    }
+                  }
+                },
+                "List_project_2": {
+                  "runAfter": {
+                    "Delay_4": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "222dc4e1-0f62-4bfc-ae16-93bf753bc812"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "siteUrl": "@variables('vProjectURL')",
+                      "project_id": "@variables('ProjectID')"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                      "connectionName": "shared_projectonline",
+                      "operationId": "ListProject"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Set_variable_2": {
+                  "runAfter": {
+                    "List_project_2": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "de08caff-b517-40bb-a2e2-e45a05377dc9"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "IsCheckedOut",
+                    "value": "@outputs('List_project_2')?['body/IsCheckedOut']"
+                  }
+                }
+              },
+              "runAfter": {
+                "Set_IsCheckedOut_before_updating_Custom_Fields": [
+                  "Succeeded"
+                ]
+              },
+              "expression": "@equals(variables('IsCheckedOut'), false)",
+              "limit": {
+                "count": 60,
+                "timeout": "PT1H"
+              },
+              "metadata": {
+                "operationMetadataId": "6dcabdc0-b42a-49c9-8bd2-62262c92a3da"
+              },
+              "type": "Until"
+            },
+            "Checkout_project_before_updating_Custom_Fields": {
+              "runAfter": {
+                "Do_until_3": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "22fe870b-0a54-4f62-bd50-3511cf3a8854"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "CheckoutProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Package": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Plan": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_46e927d3-ac46-f011-b034-00155d487b17</Parameter> \n <Parameter Type=\"String\"><![CDATA[@{items('Apply_to_each')['NGBA Test Cases[Test Package ID]']}]]></Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Link": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Package": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_4cb3b0e3-9247-f011-b02e-00155d48271f</Parameter> \n <Parameter Type=\"String\"><![CDATA[@{items('Apply_to_each')['NGBA Test Cases[Testcase Display URL]']}]]></Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Priority": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Link": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_db024bf8-ac46-f011-b02e-00155d486900</Parameter> \n <Parameter Type=\"String\">@{items('Apply_to_each')['NGBA Test Cases[Priority]']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Status": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Priority": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_95d40301-ad46-f011-b034-00155d487b17</Parameter> \n <Parameter Type=\"String\">@{items('Apply_to_each')['NGBA Test Cases[Real Status]']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Changed_On": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Status": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_ee6bd50f-ad46-f011-b028-00155d488a17</Parameter> \n <Parameter Type=\"String\">@{items('Apply_to_each')['NGBA Test Cases[Overall Changed On Text]']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Changed_By": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Changed_On": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_a84f6f1e-ad46-f011-b036-00155d487e18</Parameter> \n <Parameter Type=\"String\">@{items('Apply_to_each')['NGBA Test Cases[Overall Changed By]']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_HTTP_request_to_Update_PBI_Test_Open_Defects": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Changed_By": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "_vti_bin/client.svc/ProcessQuery\n",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "text/xml"
+                  },
+                  "parameters/body": "<?xml version=\"1.0\" ?>\n <Request ApplicationName=\"Javascript Library\" LibraryVersion=\"16.0.0.0\" SchemaVersion=\"15.0.0.0\" xmlns=\"http://schemas.microsoft.com/sharepoint/clientquery/2009\">\n <Actions>\n <Method Id=\"14\" Name=\"SetCustomFieldValue\" ObjectPathId=\"12\">\n <Parameters>\n <Parameter Type=\"String\">Custom_804e862e-ad46-f011-b02e-00155d486900</Parameter> \n <Parameter Type=\"String\">@{items('Apply_to_each')['[RemainingDefects]']}</Parameter>\n\n </Parameters>\n </Method>\n <ObjectPath Id=\"16\" ObjectPathId=\"15\"/>\n <Query Id=\"17\" ObjectPathId=\"15\">\n <Query SelectAllProperties=\"true\">\n <Properties/>\n </Query>\n </Query>\n </Actions>\n <ObjectPaths>\n <Constructor Id=\"0\" TypeId=\"{3a609e5f-e2a1-497c-87a2-e5e8a781c096}\"/>\n <Constructor Id=\"2\" TypeId=\"{f256f605-bb33-4d62-b206-72a06a765075}\">\n <Parameters>\n <Parameter ObjectPathId=\"0\"/>\n </Parameters>\n </Constructor>\n <Property Id=\"4\" Name=\"Projects\" ParentId=\"0\"/>\n <Method Id=\"6\" Name=\"GetByGuid\" ParentId=\"4\">\n <Parameters>\n <Parameter Type=\"String\">@{variables('ProjectID')}</Parameter>\n </Parameters>\n </Method>\n <Property Id=\"8\" Name=\"Draft\" ParentId=\"6\"/>\n <Property Id=\"10\" Name=\"Tasks\" ParentId=\"8\"/>\n <Method Id=\"12\" Name=\"GetByGuid\" ParentId=\"10\">\n <Parameters>\n <Parameter Type=\"String\">@{body('Parse_JSON_Created_Task_2')?['Id']}</Parameter>\n </Parameters>\n </Method>\n <Method Id=\"15\" Name=\"Update\" ParentId=\"8\"/>\n </ObjectPaths>\n</Request>"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Checkin_and_publish_project_after_updating_Custom_Fields": {
+              "runAfter": {
+                "Send_an_HTTP_request_to_Update_PBI_Test_Open_Defects": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c5729afa-8536-46ec-b2ff-09c08adcf509"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "PublishProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Checkout_project": {
+              "runAfter": {
+                "Do_until": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "22fe870b-0a54-4f62-bd50-3511cf3a8854"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "CheckoutProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Do_until": {
+              "actions": {
+                "Delay_2": {
+                  "metadata": {
+                    "operationMetadataId": "c44933c1-ba27-4be1-bc31-dd16b590689c"
+                  },
+                  "type": "Wait",
+                  "inputs": {
+                    "interval": {
+                      "count": 15,
+                      "unit": "Second"
+                    }
+                  }
+                },
+                "List_project": {
+                  "runAfter": {
+                    "Delay_2": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "222dc4e1-0f62-4bfc-ae16-93bf753bc812"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "siteUrl": "@variables('vProjectURL')",
+                      "project_id": "@variables('ProjectID')"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                      "connectionName": "shared_projectonline",
+                      "operationId": "ListProject"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Set_variable": {
+                  "runAfter": {
+                    "List_project": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "de08caff-b517-40bb-a2e2-e45a05377dc9"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "IsCheckedOut",
+                    "value": "@outputs('List_project')?['body/IsCheckedOut']"
+                  }
+                }
+              },
+              "runAfter": {
+                "Set_IsCheckedOut_after_New_Task_Created": [
+                  "Succeeded"
+                ]
+              },
+              "expression": "@equals(variables('IsCheckedOut'), false)",
+              "limit": {
+                "count": 60,
+                "timeout": "PT1H"
+              },
+              "metadata": {
+                "operationMetadataId": "6dcabdc0-b42a-49c9-8bd2-62262c92a3da"
+              },
+              "type": "Until"
+            },
+            "List_project_to_create_New_Task": {
+              "metadata": {
+                "operationMetadataId": "8bdfe777-bc51-465e-864d-b5b94ef53b23"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "siteUrl": "@variables('vProjectURL')",
+                  "project_id": "@variables('ProjectID')"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+                  "connectionName": "shared_projectonline",
+                  "operationId": "ListProject"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Set_IsCheckedOut_after_New_Task_Created": {
+              "runAfter": {
+                "List_project_to_create_New_Task": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3e8e55dd-f416-4ab6-925c-3e2d3400846f"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "IsCheckedOut",
+                "value": false
+              }
+            }
+          },
+          "runAfter": {
+            "Delay": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "2af07bea-382d-4441-a6a4-18b1b2699b9f"
+          },
+          "type": "Foreach",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 1
+            }
+          }
+        },
+        "Delay": {
+          "runAfter": {
+            "Checkin_and_publish_project": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ba13ad10-fd9e-4085-bdc6-96e265c712a3"
+          },
+          "type": "Wait",
+          "inputs": {
+            "interval": {
+              "count": 1,
+              "unit": "Minute"
+            }
+          }
+        },
+        "Get_PBI_Tasks_except_ProjectSummery_Task": {
+          "runAfter": {
+            "Checkout_the_Project_before_Creating_the_Task": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6edbce1a-af3a-4a66-b360-1efc1aded2a1"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://basf.sharepoint.com/sites/gb-project-management",
+              "parameters/method": "GET",
+              "parameters/uri": "/_api/ProjectData/Tasks?$filter=ProjectId eq guid'@{variables('ProjectID')}' and TaskIsProjectSummary eq false\n",
+              "parameters/headers": {
+                "Accept": "application/json;odata=nometadata"
+              },
+              "parameters/body": "\n\n"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "HttpRequest"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Parse_JSON_2": {
+          "runAfter": {
+            "Get_PBI_Tasks_except_ProjectSummery_Task": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1affc671-d550-4f0f-a5fe-2a1b8e27bc77"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@body('Get_PBI_Tasks_except_ProjectSummery_Task')",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ProjectId": {
+                        "type": "string"
+                      },
+                      "TaskId": {
+                        "type": "string"
+                      },
+                      "ParentTaskId": {
+                        "type": "string"
+                      },
+                      "ParentTaskName": {
+                        "type": "string"
+                      },
+                      "ProjectName": {
+                        "type": "string"
+                      },
+                      "TaskActualCost": {
+                        "type": "string"
+                      },
+                      "TaskActualDuration": {
+                        "type": "string"
+                      },
+                      "TaskActualFinishDate": {},
+                      "TaskActualFixedCost": {
+                        "type": "string"
+                      },
+                      "TaskActualOvertimeCost": {
+                        "type": "string"
+                      },
+                      "TaskActualOvertimeWork": {
+                        "type": "string"
+                      },
+                      "TaskActualRegularCost": {
+                        "type": "string"
+                      },
+                      "TaskActualRegularWork": {
+                        "type": "string"
+                      },
+                      "TaskActualStartDate": {},
+                      "TaskActualWork": {
+                        "type": "string"
+                      },
+                      "TaskACWP": {
+                        "type": "string"
+                      },
+                      "TaskBCWP": {
+                        "type": "string"
+                      },
+                      "TaskBCWS": {
+                        "type": "string"
+                      },
+                      "TaskBudgetCost": {
+                        "type": "string"
+                      },
+                      "TaskBudgetWork": {
+                        "type": "string"
+                      },
+                      "TaskClientUniqueId": {
+                        "type": "integer"
+                      },
+                      "TaskCost": {
+                        "type": "string"
+                      },
+                      "TaskCostVariance": {
+                        "type": "string"
+                      },
+                      "TaskCPI": {
+                        "type": "string"
+                      },
+                      "TaskCreatedDate": {
+                        "type": "string"
+                      },
+                      "TaskCreatedRevisionCounter": {
+                        "type": "integer"
+                      },
+                      "TaskCV": {
+                        "type": "string"
+                      },
+                      "TaskCVP": {
+                        "type": "string"
+                      },
+                      "TaskDeadline": {},
+                      "TaskDeliverableFinishDate": {},
+                      "TaskDeliverableStartDate": {},
+                      "TaskDuration": {
+                        "type": "string"
+                      },
+                      "TaskDurationIsEstimated": {
+                        "type": "boolean"
+                      },
+                      "TaskDurationString": {},
+                      "TaskDurationVariance": {
+                        "type": "string"
+                      },
+                      "TaskEAC": {
+                        "type": "string"
+                      },
+                      "TaskEarlyFinish": {
+                        "type": "string"
+                      },
+                      "TaskEarlyStart": {
+                        "type": "string"
+                      },
+                      "TaskFinishDate": {
+                        "type": "string"
+                      },
+                      "TaskFinishDateString": {},
+                      "TaskFinishVariance": {
+                        "type": "string"
+                      },
+                      "TaskFixedCost": {
+                        "type": "string"
+                      },
+                      "TaskFixedCostAssignmentId": {
+                        "type": "string"
+                      },
+                      "TaskFreeSlack": {
+                        "type": "string"
+                      },
+                      "TaskHyperLinkAddress": {},
+                      "TaskHyperLinkFriendlyName": {},
+                      "TaskHyperLinkSubAddress": {},
+                      "TaskIgnoresResourceCalendar": {
+                        "type": "boolean"
+                      },
+                      "TaskIndex": {
+                        "type": "integer"
+                      },
+                      "TaskIsActive": {
+                        "type": "boolean"
+                      },
+                      "TaskIsCritical": {
+                        "type": "boolean"
+                      },
+                      "TaskIsEffortDriven": {
+                        "type": "boolean"
+                      },
+                      "TaskIsExternal": {
+                        "type": "boolean"
+                      },
+                      "TaskIsManuallyScheduled": {
+                        "type": "boolean"
+                      },
+                      "TaskIsMarked": {
+                        "type": "boolean"
+                      },
+                      "TaskIsMilestone": {
+                        "type": "boolean"
+                      },
+                      "TaskIsOverallocated": {
+                        "type": "boolean"
+                      },
+                      "TaskIsProjectSummary": {
+                        "type": "boolean"
+                      },
+                      "TaskIsRecurring": {
+                        "type": "boolean"
+                      },
+                      "TaskIsSummary": {
+                        "type": "boolean"
+                      },
+                      "TaskLateFinish": {
+                        "type": "string"
+                      },
+                      "TaskLateStart": {
+                        "type": "string"
+                      },
+                      "TaskLevelingDelay": {
+                        "type": "string"
+                      },
+                      "TaskModifiedDate": {
+                        "type": "string"
+                      },
+                      "TaskModifiedRevisionCounter": {
+                        "type": "integer"
+                      },
+                      "TaskName": {
+                        "type": "string"
+                      },
+                      "TaskOutlineLevel": {
+                        "type": "integer"
+                      },
+                      "TaskOutlineNumber": {
+                        "type": "string"
+                      },
+                      "TaskOvertimeCost": {
+                        "type": "string"
+                      },
+                      "TaskOvertimeWork": {
+                        "type": "string"
+                      },
+                      "TaskPercentCompleted": {
+                        "type": "integer"
+                      },
+                      "TaskPercentWorkCompleted": {
+                        "type": "integer"
+                      },
+                      "TaskPhysicalPercentCompleted": {
+                        "type": "integer"
+                      },
+                      "TaskPriority": {
+                        "type": "integer"
+                      },
+                      "TaskRegularCost": {
+                        "type": "string"
+                      },
+                      "TaskRegularWork": {
+                        "type": "string"
+                      },
+                      "TaskRemainingCost": {
+                        "type": "string"
+                      },
+                      "TaskRemainingDuration": {
+                        "type": "string"
+                      },
+                      "TaskRemainingOvertimeCost": {
+                        "type": "string"
+                      },
+                      "TaskRemainingOvertimeWork": {
+                        "type": "string"
+                      },
+                      "TaskRemainingRegularCost": {
+                        "type": "string"
+                      },
+                      "TaskRemainingRegularWork": {
+                        "type": "string"
+                      },
+                      "TaskRemainingWork": {
+                        "type": "string"
+                      },
+                      "TaskResourcePlanWork": {
+                        "type": "string"
+                      },
+                      "TaskSPI": {
+                        "type": "string"
+                      },
+                      "TaskStartDate": {
+                        "type": "string"
+                      },
+                      "TaskStartDateString": {},
+                      "TaskStartVariance": {
+                        "type": "string"
+                      },
+                      "TaskStatusManagerUID": {
+                        "type": "string"
+                      },
+                      "TaskSV": {
+                        "type": "string"
+                      },
+                      "TaskSVP": {
+                        "type": "string"
+                      },
+                      "TaskTCPI": {
+                        "type": "string"
+                      },
+                      "TaskTotalSlack": {
+                        "type": "string"
+                      },
+                      "TaskVAC": {
+                        "type": "string"
+                      },
+                      "TaskWBS": {
+                        "type": "string"
+                      },
+                      "TaskWork": {
+                        "type": "string"
+                      },
+                      "TaskWorkVariance": {
+                        "type": "string"
+                      },
+                      "Health": {},
+                      "FlagStatus": {},
+                      "Test2": {},
+                      "Taskfield2Text1": {},
+                      "WorkItemID": {},
+                      "ADO_ID": {},
+                      "ADO_State": {},
+                      "ADO_BO_ID": {},
+                      "ADO_Iteration": {},
+                      "ADO_Area": {},
+                      "ADO_Start_Baseline": {},
+                      "ADO_End_Baseline": {},
+                      "ADO_Responsible": {},
+                      "PBI_Test_Package": {},
+                      "PBI_Test_Case_Description": {},
+                      "PBI_Test_Priority": {},
+                      "PBI_Test_Status": {},
+                      "PBI_Test_Changed_On": {},
+                      "PBI_Test_Changed_By": {},
+                      "PBI_Test_Open_Defects": {},
+                      "PBI_Defect_Description": {},
+                      "PBI_Defect_ID": {},
+                      "PBI_Defect_Link": {},
+                      "PBI_Defect_Category": {},
+                      "PBI_Test_Plan": {},
+                      "PBI_Test_Link": {},
+                      "PBI_Defect_KPI": {},
+                      "PBI_Defect_Opened_h": {},
+                      "PBI_Defect_Status": {},
+                      "PBI_Defect_Priority": {},
+                      "PBI_Defect_Reporter": {},
+                      "PBI_Defect_Processor": {},
+                      "PBI_Defect_Created_On": {},
+                      "PBI_Defect_Changed_On": {},
+                      "PBI_Defect_Support_Team": {},
+                      "PBI_Defect_Opened_d": {},
+                      "PBI_Defect_In_Process_d": {},
+                      "PBI_Defect_Customer_Action_d": {},
+                      "PBI_Defect_Proposed_Solution_d": {},
+                      "PBI_Defect_Rejected_d": {},
+                      "PBI_Defect_Wait_for_Transport_d": {},
+                      "PBI_Defect_Wait_for_Parent_d": {},
+                      "ADO_Task_Type": {},
+                      "ADO_End_Actual": {},
+                      "ADO_Primary_Owner": {}
+                    },
+                    "required": [
+                      "ProjectId",
+                      "TaskId",
+                      "ParentTaskId",
+                      "ParentTaskName",
+                      "ProjectName",
+                      "TaskActualCost",
+                      "TaskActualDuration",
+                      "TaskActualFinishDate",
+                      "TaskActualFixedCost",
+                      "TaskActualOvertimeCost",
+                      "TaskActualOvertimeWork",
+                      "TaskActualRegularCost",
+                      "TaskActualRegularWork",
+                      "TaskActualStartDate",
+                      "TaskActualWork",
+                      "TaskACWP",
+                      "TaskBCWP",
+                      "TaskBCWS",
+                      "TaskBudgetCost",
+                      "TaskBudgetWork",
+                      "TaskClientUniqueId",
+                      "TaskCost",
+                      "TaskCostVariance",
+                      "TaskCPI",
+                      "TaskCreatedDate",
+                      "TaskCreatedRevisionCounter",
+                      "TaskCV",
+                      "TaskCVP",
+                      "TaskDeadline",
+                      "TaskDeliverableFinishDate",
+                      "TaskDeliverableStartDate",
+                      "TaskDuration",
+                      "TaskDurationIsEstimated",
+                      "TaskDurationString",
+                      "TaskDurationVariance",
+                      "TaskEAC",
+                      "TaskEarlyFinish",
+                      "TaskEarlyStart",
+                      "TaskFinishDate",
+                      "TaskFinishDateString",
+                      "TaskFinishVariance",
+                      "TaskFixedCost",
+                      "TaskFixedCostAssignmentId",
+                      "TaskFreeSlack",
+                      "TaskHyperLinkAddress",
+                      "TaskHyperLinkFriendlyName",
+                      "TaskHyperLinkSubAddress",
+                      "TaskIgnoresResourceCalendar",
+                      "TaskIndex",
+                      "TaskIsActive",
+                      "TaskIsCritical",
+                      "TaskIsEffortDriven",
+                      "TaskIsExternal",
+                      "TaskIsManuallyScheduled",
+                      "TaskIsMarked",
+                      "TaskIsMilestone",
+                      "TaskIsOverallocated",
+                      "TaskIsProjectSummary",
+                      "TaskIsRecurring",
+                      "TaskIsSummary",
+                      "TaskLateFinish",
+                      "TaskLateStart",
+                      "TaskLevelingDelay",
+                      "TaskModifiedDate",
+                      "TaskModifiedRevisionCounter",
+                      "TaskName",
+                      "TaskOutlineLevel",
+                      "TaskOutlineNumber",
+                      "TaskOvertimeCost",
+                      "TaskOvertimeWork",
+                      "TaskPercentCompleted",
+                      "TaskPercentWorkCompleted",
+                      "TaskPhysicalPercentCompleted",
+                      "TaskPriority",
+                      "TaskRegularCost",
+                      "TaskRegularWork",
+                      "TaskRemainingCost",
+                      "TaskRemainingDuration",
+                      "TaskRemainingOvertimeCost",
+                      "TaskRemainingOvertimeWork",
+                      "TaskRemainingRegularCost",
+                      "TaskRemainingRegularWork",
+                      "TaskRemainingWork",
+                      "TaskResourcePlanWork",
+                      "TaskSPI",
+                      "TaskStartDate",
+                      "TaskStartDateString",
+                      "TaskStartVariance",
+                      "TaskStatusManagerUID",
+                      "TaskSV",
+                      "TaskSVP",
+                      "TaskTCPI",
+                      "TaskTotalSlack",
+                      "TaskVAC",
+                      "TaskWBS",
+                      "TaskWork",
+                      "TaskWorkVariance",
+                      "Health",
+                      "FlagStatus",
+                      "Test2",
+                      "Taskfield2Text1",
+                      "WorkItemID",
+                      "ADO_ID",
+                      "ADO_State",
+                      "ADO_BO_ID",
+                      "ADO_Iteration",
+                      "ADO_Area",
+                      "ADO_Start_Baseline",
+                      "ADO_End_Baseline",
+                      "ADO_Responsible",
+                      "PBI_Test_Package",
+                      "PBI_Test_Case_Description",
+                      "PBI_Test_Priority",
+                      "PBI_Test_Status",
+                      "PBI_Test_Changed_On",
+                      "PBI_Test_Changed_By",
+                      "PBI_Test_Open_Defects",
+                      "PBI_Defect_Description",
+                      "PBI_Defect_ID",
+                      "PBI_Defect_Link",
+                      "PBI_Defect_Category",
+                      "PBI_Test_Plan",
+                      "PBI_Test_Link",
+                      "PBI_Defect_KPI",
+                      "PBI_Defect_Opened_h",
+                      "PBI_Defect_Status",
+                      "PBI_Defect_Priority",
+                      "PBI_Defect_Reporter",
+                      "PBI_Defect_Processor",
+                      "PBI_Defect_Created_On",
+                      "PBI_Defect_Changed_On",
+                      "PBI_Defect_Support_Team",
+                      "PBI_Defect_Opened_d",
+                      "PBI_Defect_In_Process_d",
+                      "PBI_Defect_Customer_Action_d",
+                      "PBI_Defect_Proposed_Solution_d",
+                      "PBI_Defect_Rejected_d",
+                      "PBI_Defect_Wait_for_Transport_d",
+                      "PBI_Defect_Wait_for_Parent_d",
+                      "ADO_Task_Type",
+                      "ADO_End_Actual",
+                      "ADO_Primary_Owner"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Apply_to_each_2": {
+          "foreach": "@body('Parse_JSON_2')?['value']",
+          "actions": {
+            "Send_an_HTTP_request_to_Update_Custom_Fields": {
+              "metadata": {
+                "operationMetadataId": "3e62dd99-bdaf-4854-8a88-6486c84af8d9"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "@variables('vProjectURL')",
+                  "parameters/method": "POST",
+                  "parameters/uri": "/_api/ProjectServer/Projects('@{variables('ProjectID')}')/Draft/Tasks('@{items('Apply_to_each_2')?['TaskId']}')/deleteObject()",
+                  "parameters/headers": {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "application/json;odata=verbose"
+                  }
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "HttpRequest"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Parse_JSON_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "db54857c-2dee-4305-9ebc-ce7f7b131a58"
+          },
+          "type": "Foreach"
+        },
+        "Checkin_and_publish_project": {
+          "runAfter": {
+            "Apply_to_each_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c5729afa-8536-46ec-b2ff-09c08adcf509"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "siteUrl": "@variables('vProjectURL')",
+              "project_id": "@variables('ProjectID')"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_projectonline",
+              "connectionName": "shared_projectonline",
+              "operationId": "PublishProject"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

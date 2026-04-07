@@ -1,0 +1,728 @@
+<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26031.175" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26031.00175">
+  <Entities></Entities>
+  <Roles></Roles>
+  <Workflows>
+    <Workflow WorkflowId="{b717670b-6719-f111-8342-000d3ab2c546}" Name="Schedule APIs - Draft Resource Assignment">
+      <JsonFileName>/Workflows/ScheduleAPIs-DraftResourceAssignment-B717670B-6719-F111-8342-000D3AB2C546.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Schedule APIs - Draft Resource Assignment" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{a2979af6-7a19-f111-8342-000d3ab2c546}" Name="Assign Resource From SPList">
+      <JsonFileName>/Workflows/AssignResourceFromSPList-A2979AF6-7A19-F111-8342-000D3AB2C546.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.2</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Assign Resource From SPList" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{fcd62b40-16d5-f011-8544-7c1e5234ef55}" Name="Child Flow - Schedule APIs - Planner Task">
+      <JsonFileName>/Workflows/ChildFlow-ScheduleAPIs-PlannerTask-FCD62B40-16D5-F011-8544-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Child Flow - Schedule APIs - Planner Task" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{33c494ca-27f2-f011-8406-000d3ab2c546}" Name="Planner DevOps Integration-Sync" Description="Add a new items into a SharePoint list and then send an email when a button or link in Power Apps is selected.">
+      <JsonFileName>/Workflows/PlannerDevOpsIntegration-Sync-33C494CA-27F2-F011-8406-000D3AB2C546.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Planner DevOps Integration-Sync" />
+      </LocalizedNames>
+      <Descriptions>
+        <Description languagecode="1033" description="Add a new items into a SharePoint list and then send an email when a button or link in Power Apps is selected." />
+      </Descriptions>
+    </Workflow>
+    <Workflow WorkflowId="{ffc9cf08-57fb-f011-8406-000d3ab2c546}" Name="Child Flow - Planner Task - Create/Update">
+      <JsonFileName>/Workflows/ChildFlow-PlannerTask-CreateUpdate-FFC9CF08-57FB-F011-8406-000D3AB2C546.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Child Flow - Planner Task - Create/Update" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{8de40bad-6307-f111-8407-000d3ab2c546}" Name="Sync Excel to Planner">
+      <JsonFileName>/Workflows/SyncExceltoPlanner-8DE40BAD-6307-F111-8407-000D3AB2C546.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Sync Excel to Planner" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{ac7d2707-12d5-f011-8544-7c1e5234ef55}" Name="2 PLANNER - New Work Item Is Created - without filters">
+      <JsonFileName>/Workflows/2PLANNER-NewWorkItemIsCreated-withoutfilters-AC7D2707-12D5-F011-8544-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="2 PLANNER - New Work Item Is Created - without filters" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{6ef1ad8f-09bb-f011-bbd3-7c1e5234ef55}" Name="2 PLANNER - (Pilot) - User Story - New Work Item Is Created - AP W1 - [Build] - User Stories - Azur">
+      <JsonFileName>/Workflows/2PLANNER-Pilot-UserStory-NewWorkItemIsCreated-APW1-6EF1AD8F-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="2 PLANNER - (Pilot) - User Story - New Work Item Is Created - AP W1 - [Build] - User Stories - Azur" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{6ff1ad8f-09bb-f011-bbd3-7c1e5234ef55}" Name="3 PLANNER - (Pilot - CORRECTED) - User Story - Work Item Is Updated - AP W1 - [Build] - User Storie">
+      <JsonFileName>/Workflows/3PLANNER-Pilot-CORRECTED-UserStory-WorkItemIsUpdat-6FF1AD8F-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="3 PLANNER - (Pilot - CORRECTED) - User Story - Work Item Is Updated - AP W1 - [Build] - User Storie" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{70f1ad8f-09bb-f011-bbd3-7c1e5234ef55}" Name="2 PLANNER - (Pilot) - 3. New Work Item Is Created - AP W1 - [Data Migration] - Data Validation - Az">
+      <JsonFileName>/Workflows/2PLANNER-Pilot-3NewWorkItemIsCreated-APW1-DataMigr-70F1AD8F-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="2 PLANNER - (Pilot) - 3. New Work Item Is Created - AP W1 - [Data Migration] - Data Validation - Az" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{71f1ad8f-09bb-f011-bbd3-7c1e5234ef55}" Name="1 PLANNER - (Pilot) - User Story - Update Task Custom Field Query - AP W1 - [Build] - User Stories ">
+      <JsonFileName>/Workflows/1PLANNER-Pilot-UserStory-UpdateTaskCustomFieldQuer-71F1AD8F-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="1 PLANNER - (Pilot) - User Story - Update Task Custom Field Query - AP W1 - [Build] - User Stories " />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{5959a695-09bb-f011-bbd3-7c1e5234ef55}" Name="3 PLANNER - (Pilot - CORRECTED) - Bug Test - Work Item Is Updated - AP W1 - [Data Migration] - Bugs">
+      <JsonFileName>/Workflows/3PLANNER-Pilot-CORRECTED-BugTest-WorkItemIsUpdated-5959A695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="3 PLANNER - (Pilot - CORRECTED) - Bug Test - Work Item Is Updated - AP W1 - [Data Migration] - Bugs" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{5a59a695-09bb-f011-bbd3-7c1e5234ef55}" Name="4 PLANNER - (Pilot) 5. Update Project Tasks From Power BI - Test Cases - GB TEAMS 1 AP W1 - [Testin">
+      <JsonFileName>/Workflows/4PLANNER-Pilot5UpdateProjectTasksFromPowerBI-TestC-5A59A695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="4 PLANNER - (Pilot) 5. Update Project Tasks From Power BI - Test Cases - GB TEAMS 1 AP W1 - [Testin" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{5b59a695-09bb-f011-bbd3-7c1e5234ef55}" Name="1 PLANNER - (Pilot) - 2. Update Task Custom Field Query - AP W1 - [Data Migration] - Data Validatio">
+      <JsonFileName>/Workflows/1PLANNER-Pilot-2UpdateTaskCustomFieldQuery-APW1-Da-5B59A695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="1 PLANNER - (Pilot) - 2. Update Task Custom Field Query - AP W1 - [Data Migration] - Data Validatio" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{5c59a695-09bb-f011-bbd3-7c1e5234ef55}" Name="3 PLANNER - (Pilot - CORRECTED) - 4. Work Item Is Updated - AP W1 - [Data Migration] - Data Validat">
+      <JsonFileName>/Workflows/3PLANNER-Pilot-CORRECTED-4WorkItemIsUpdated-APW1-D-5C59A695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="3 PLANNER - (Pilot - CORRECTED) - 4. Work Item Is Updated - AP W1 - [Data Migration] - Data Validat" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{9d59a695-09bb-f011-bbd3-7c1e5234ef55}" Name="1 PLANNER - (Pilot) - Bug Test - Update Task Custom Field Query - AP W1 - [Data Migration] - Bugs -">
+      <JsonFileName>/Workflows/1PLANNER-Pilot-BugTest-UpdateTaskCustomFieldQuery--9D59A695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="1 PLANNER - (Pilot) - Bug Test - Update Task Custom Field Query - AP W1 - [Data Migration] - Bugs -" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{a359a695-09bb-f011-bbd3-7c1e5234ef55}" Name="2 PLANNER - (Pilot) - Bug Test - New Work Item Is Created - AP W1 - [Data Migration] - Bugs - Azure">
+      <JsonFileName>/Workflows/2PLANNER-Pilot-BugTest-NewWorkItemIsCreated-APW1-D-A359A695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="2 PLANNER - (Pilot) - Bug Test - New Work Item Is Created - AP W1 - [Data Migration] - Bugs - Azure" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{065aa695-09bb-f011-bbd3-7c1e5234ef55}" Name="4 PLANNER - (Pilot) 6. Update Project Tasks From PowerBI - Defects - GB TEAMS 1 AP W1 - [Testing] -">
+      <JsonFileName>/Workflows/4PLANNER-Pilot6UpdateProjectTasksFromPowerBI-Defec-065AA695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="4 PLANNER - (Pilot) 6. Update Project Tasks From PowerBI - Defects - GB TEAMS 1 AP W1 - [Testing] -" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{075aa695-09bb-f011-bbd3-7c1e5234ef55}" Name="4 PLANNER - (Pilot - 2 NEW) 7. Update Project Tasks From Power BI - Inconsistencies 1 TEAMS AP W1 -">
+      <JsonFileName>/Workflows/4PLANNER-Pilot-2NEW7UpdateProjectTasksFromPowerBI--075AA695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="4 PLANNER - (Pilot - 2 NEW) 7. Update Project Tasks From Power BI - Inconsistencies 1 TEAMS AP W1 -" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{085aa695-09bb-f011-bbd3-7c1e5234ef55}" Name="4 PLANNER - (Pilot) 8. Update Project Tasks From Power BI - Inconsistencies 2 TEAMS AP W1 - [Testin">
+      <JsonFileName>/Workflows/4PLANNER-Pilot8UpdateProjectTasksFromPowerBI-Incon-085AA695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="4 PLANNER - (Pilot) 8. Update Project Tasks From Power BI - Inconsistencies 2 TEAMS AP W1 - [Testin" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{095aa695-09bb-f011-bbd3-7c1e5234ef55}" Name="5 PLANNER - (Launch) - Get ADO Workitem - AP W2 - Project Management [Planner]">
+      <JsonFileName>/Workflows/5PLANNER-Launch-GetADOWorkitem-APW2-ProjectManagem-095AA695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>0</StateCode>
+      <StatusCode>1</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="5 PLANNER - (Launch) - Get ADO Workitem - AP W2 - Project Management [Planner]" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{3c5aa695-09bb-f011-bbd3-7c1e5234ef55}" Name="6 PLANNER (to be finished) - SPList to Planner Premium">
+      <JsonFileName>/Workflows/6PLANNERtobefinished-SPListtoPlannerPremium-3C5AA695-09BB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="6 PLANNER (to be finished) - SPList to Planner Premium" />
+      </LocalizedNames>
+    </Workflow>
+    <Workflow WorkflowId="{840814ab-1dbb-f011-bbd3-7c1e5234ef55}" Name="Button -&gt; Perform an unbound action in selected environment">
+      <JsonFileName>/Workflows/Button-Performanunboundactioninselectedenvironment-840814AB-1DBB-F011-BBD3-7C1E5234EF55.json</JsonFileName>
+      <Type>1</Type>
+      <Subprocess>0</Subprocess>
+      <Category>5</Category>
+      <Mode>0</Mode>
+      <Scope>4</Scope>
+      <OnDemand>0</OnDemand>
+      <TriggerOnCreate>0</TriggerOnCreate>
+      <TriggerOnDelete>0</TriggerOnDelete>
+      <AsyncAutodelete>0</AsyncAutodelete>
+      <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <RunAs>1</RunAs>
+      <IsTransacted>1</IsTransacted>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <BusinessProcessType>0</BusinessProcessType>
+      <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+      <ModernFlowType>0</ModernFlowType>
+      <PrimaryEntity>none</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Button -&gt; Perform an unbound action in selected environment" />
+      </LocalizedNames>
+    </Workflow>
+  </Workflows>
+  <FieldSecurityProfiles></FieldSecurityProfiles>
+  <Templates />
+  <EntityMaps />
+  <EntityRelationships />
+  <OrganizationSettings />
+  <optionsets />
+  <CustomControls />
+  <EntityDataProviders />
+  <CanvasApps>
+    <CanvasApp>
+      <Name>paloma_plannermasterapp_d45a4</Name>
+      <AppVersion>2025-12-04T14:36:21Z</AppVersion>
+      <Status>Ready</Status>
+      <CreatedByClientVersion>3.25111.6.0</CreatedByClientVersion>
+      <MinClientVersion>3.25111.6.0</MinClientVersion>
+      <Tags>{"primaryDeviceWidth":"1366","primaryDeviceHeight":"768","supportsPortrait":"true","supportsLandscape":"true","primaryFormFactor":"Tablet","showStatusBar":"false","publisherVersion":"3.25111.6","minimumRequiredApiVersion":"2.2.0","hasComponent":"false","hasUnlockedComponent":"false","isUnifiedRootApp":"false","sienaVersion":"20251201T155507Z-3.25111.6.0"}</Tags>
+      <IsCdsUpgraded>0</IsCdsUpgraded>
+      <GalleryItemId xsi:nil="true"></GalleryItemId>
+      <BackgroundColor>RGBA(0,176,240,1)</BackgroundColor>
+      <DisplayName>Planner Master App</DisplayName>
+      <Description xsi:nil="true"></Description>
+      <CommitMessage xsi:nil="true"></CommitMessage>
+      <Publisher xsi:nil="true"></Publisher>
+      <AuthorizationReferences>[]</AuthorizationReferences>
+      <ConnectionReferences>{}</ConnectionReferences>
+      <DatabaseReferences>{}</DatabaseReferences>
+      <AppComponents>[]</AppComponents>
+      <AppComponentDependencies>[]</AppComponentDependencies>
+      <CanConsumeAppPass>1</CanConsumeAppPass>
+      <CanvasAppType>0</CanvasAppType>
+      <BypassConsent>0</BypassConsent>
+      <AdminControlBypassConsent>0</AdminControlBypassConsent>
+      <EmbeddedApp xsi:nil="true"></EmbeddedApp>
+      <IntroducedVersion>1.0</IntroducedVersion>
+      <CdsDependencies>{"cdsdependencies":[]}</CdsDependencies>
+      <IsCustomizable>1</IsCustomizable>
+      <BackgroundImageUri>/CanvasApps/paloma_plannermasterapp_d45a4_BackgroundImageUri</BackgroundImageUri>
+      <DocumentUri>/CanvasApps/paloma_plannermasterapp_d45a4_DocumentUri.msapp</DocumentUri>
+      <AdditionalUris>
+        <AdditionalUri>/CanvasApps/paloma_plannermasterapp_d45a4_AdditionalUris0_identity.json</AdditionalUri>
+      </AdditionalUris>
+    </CanvasApp>
+  </CanvasApps>
+  <connectionreferences>
+    <connectionreference connectionreferencelogicalname="d2d_sharedcommondataserviceforapps_5c6d9">
+      <connectionreferencedisplayname>Dataverse Conn Ref</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps</connectorid>
+      <description>Dataverse Conn Ref</description>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedcommondataserviceforapps_da480">
+      <connectionreferencedisplayname>Microsoft Dataverse PlannerFlows-da480</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedexcelonlinebusiness_0298b">
+      <connectionreferencedisplayname>Excel Online (Business) PlannerFlows-0298b</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedexcelonlinebusiness_aec16">
+      <connectionreferencedisplayname>Excel Online (Business) PlannerFlows-aec16</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedplanner_746db">
+      <connectionreferencedisplayname>Planner PlannerFlows-746db</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_planner</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedpowerbi_b72bf">
+      <connectionreferencedisplayname>Power BI PlannerFlows-b72bf</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_powerbi</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedprojectonline_2805b">
+      <connectionreferencedisplayname>Project Online PlannerFlows-2805b</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_projectonline</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedsharepointonline_8e59f">
+      <connectionreferencedisplayname>SharePoint PlannerFlows-8e59f</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_sharepointonline</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+    <connectionreference connectionreferencelogicalname="paloma_sharedvisualstudioteamservices_df734">
+      <connectionreferencedisplayname>Azure DevOps PlannerFlows-df734</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_visualstudioteamservices</connectorid>
+      <iscustomizable>1</iscustomizable>
+      <promptingbehavior>0</promptingbehavior>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
+  </connectionreferences>
+  <Languages>
+    <Language>1033</Language>
+  </Languages>
+</ImportExportXml>
