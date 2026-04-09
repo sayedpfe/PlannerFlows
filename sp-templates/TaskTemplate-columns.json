@@ -1,0 +1,264 @@
+[
+  {
+    "internalName": "Title",
+    "displayName": "Title",
+    "type": "Text",
+    "maxLength": 255,
+    "required": true,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "Task name",
+    "builtIn": true
+  },
+  {
+    "internalName": "OutlineLevel",
+    "displayName": "OutlineLevel",
+    "type": "Number",
+    "decimals": 0,
+    "required": true,
+    "indexed": true,
+    "defaultValue": 1,
+    "description": "WBS depth: 1=root, 2=child, 3=grandchild, etc."
+  },
+  {
+    "internalName": "ParentTaskId",
+    "displayName": "ParentTaskId",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "SP item ID of parent task (blank = root)"
+  },
+  {
+    "internalName": "SortOrder",
+    "displayName": "SortOrder",
+    "type": "Number",
+    "decimals": 0,
+    "required": true,
+    "indexed": false,
+    "defaultValue": 0,
+    "description": "Display order within siblings"
+  },
+  {
+    "internalName": "PSP",
+    "displayName": "PSP",
+    "type": "Text",
+    "maxLength": 50,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "WBS path code: 1.2.3"
+  },
+  {
+    "internalName": "PercentComplete",
+    "displayName": "PercentComplete",
+    "type": "Number",
+    "decimals": 0,
+    "min": 0,
+    "max": 100,
+    "required": false,
+    "indexed": false,
+    "defaultValue": 0,
+    "description": "Percent complete (0-100)"
+  },
+  {
+    "internalName": "Priority",
+    "displayName": "Priority",
+    "type": "Choice",
+    "required": false,
+    "indexed": false,
+    "defaultValue": "Medium",
+    "choices": ["Critical", "High", "Medium", "Low"],
+    "description": "Task priority"
+  },
+  {
+    "internalName": "Status",
+    "displayName": "Status",
+    "type": "Choice",
+    "required": true,
+    "indexed": true,
+    "defaultValue": "Not Started",
+    "choices": ["Not Started", "In Progress", "Completed", "Blocked", "Cancelled"],
+    "description": "Task status"
+  },
+  {
+    "internalName": "Bucket",
+    "displayName": "Bucket",
+    "type": "Text",
+    "maxLength": 100,
+    "required": false,
+    "indexed": true,
+    "defaultValue": "Backlog",
+    "description": "Kanban column grouping"
+  },
+  {
+    "internalName": "Start",
+    "displayName": "Start",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Planned start date"
+  },
+  {
+    "internalName": "EndDate",
+    "displayName": "EndDate",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Planned end date"
+  },
+  {
+    "internalName": "Duration",
+    "displayName": "Duration",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Working days"
+  },
+  {
+    "internalName": "Start_Baseline",
+    "displayName": "Start_Baseline",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Frozen baseline start date"
+  },
+  {
+    "internalName": "End_Baseline",
+    "displayName": "End_Baseline",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Frozen baseline end date"
+  },
+  {
+    "internalName": "Predecessor",
+    "displayName": "Predecessor",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Dependencies: 5FS,12SS+2d"
+  },
+  {
+    "internalName": "AssignedTo",
+    "displayName": "AssignedTo",
+    "type": "UserMulti",
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Resource assignment (multiple people)"
+  },
+  {
+    "internalName": "ADO_ID",
+    "displayName": "ADO_ID",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "Azure DevOps work item ID"
+  },
+  {
+    "internalName": "ADO_State",
+    "displayName": "ADO_State",
+    "type": "Text",
+    "maxLength": 100,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Synced from ADO System.State"
+  },
+  {
+    "internalName": "ADO_WorkItemType",
+    "displayName": "ADO_WorkItemType",
+    "type": "Text",
+    "maxLength": 100,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Bug, User Story, Task, etc."
+  },
+  {
+    "internalName": "ADO_AreaPath",
+    "displayName": "ADO_AreaPath",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "Synced area path"
+  },
+  {
+    "internalName": "ADO_IterationPath",
+    "displayName": "ADO_IterationPath",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Synced iteration path"
+  },
+  {
+    "internalName": "ADO_Responsible",
+    "displayName": "ADO_Responsible",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "ADO responsible person"
+  },
+  {
+    "internalName": "ADO_BO_ID",
+    "displayName": "ADO_BO_ID",
+    "type": "Text",
+    "maxLength": 100,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Business object ID"
+  },
+  {
+    "internalName": "LastSyncTimestamp",
+    "displayName": "LastSyncTimestamp",
+    "type": "DateTime",
+    "dateOnly": false,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Echo-loop prevention for bidirectional sync"
+  },
+  {
+    "internalName": "SyncError",
+    "displayName": "SyncError",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Last sync error message (if any)"
+  },
+  {
+    "internalName": "Notes",
+    "displayName": "Notes",
+    "type": "Note",
+    "richText": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Task notes"
+  }
+]

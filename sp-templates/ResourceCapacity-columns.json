@@ -1,0 +1,112 @@
+[
+  {
+    "internalName": "PersonName",
+    "displayName": "PersonName",
+    "type": "Text",
+    "maxLength": 255,
+    "required": true,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "Full name"
+  },
+  {
+    "internalName": "PersonEmail",
+    "displayName": "PersonEmail",
+    "type": "Text",
+    "maxLength": 255,
+    "required": true,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "Email (unique key per project)"
+  },
+  {
+    "internalName": "ProjectName",
+    "displayName": "ProjectName",
+    "type": "Text",
+    "maxLength": 255,
+    "required": true,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "From ProjectRegistry.Title"
+  },
+  {
+    "internalName": "ProjectListName",
+    "displayName": "ProjectListName",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "SP list name reference"
+  },
+  {
+    "internalName": "TaskCount",
+    "displayName": "TaskCount",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": false,
+    "defaultValue": 0,
+    "description": "Tasks assigned to this person in this project"
+  },
+  {
+    "internalName": "TotalDuration",
+    "displayName": "TotalDuration",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": false,
+    "defaultValue": 0,
+    "description": "Sum of Duration for assigned tasks"
+  },
+  {
+    "internalName": "CompletedTasks",
+    "displayName": "CompletedTasks",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": false,
+    "defaultValue": 0,
+    "description": "Tasks with Status = Completed"
+  },
+  {
+    "internalName": "EarliestStart",
+    "displayName": "EarliestStart",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Min(Start) of assigned tasks"
+  },
+  {
+    "internalName": "LatestEnd",
+    "displayName": "LatestEnd",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Max(EndDate) of assigned tasks"
+  },
+  {
+    "internalName": "AvgPercentComplete",
+    "displayName": "AvgPercentComplete",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": false,
+    "defaultValue": 0,
+    "description": "Average PercentComplete"
+  },
+  {
+    "internalName": "LastUpdated",
+    "displayName": "LastUpdated",
+    "type": "DateTime",
+    "dateOnly": false,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "When this row was last refreshed"
+  }
+]

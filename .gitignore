@@ -1,2 +1,30 @@
-# Ignore zip archives
+# Dependencies
+node_modules/
+
+# Build output
+out/
+obj/
+bin/
+
+# PCF generated
+**/generated/ManifestTypes.d.ts
+
+# Archives
 *.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.suo
+*.user
+*.sln.docstates
+
+# NuGet
+*.nupkg
+nuget.exe
+
+# Package locks (optional)
+# package-lock.json

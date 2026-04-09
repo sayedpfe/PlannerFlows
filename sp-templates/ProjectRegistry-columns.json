@@ -1,0 +1,132 @@
+[
+  {
+    "internalName": "Title",
+    "displayName": "Title",
+    "type": "Text",
+    "maxLength": 255,
+    "required": true,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "Project display name",
+    "builtIn": true
+  },
+  {
+    "internalName": "ProjectListName",
+    "displayName": "ProjectListName",
+    "type": "Text",
+    "maxLength": 255,
+    "required": true,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "SP list name for this project's tasks (e.g., Tasks_ProjectAlpha)"
+  },
+  {
+    "internalName": "ADO_Project",
+    "displayName": "ADO_Project",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "ADO team project name (for sync filter)"
+  },
+  {
+    "internalName": "ADO_AreaPath",
+    "displayName": "ADO_AreaPath",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": true,
+    "defaultValue": null,
+    "description": "ADO area path (for sync filter)"
+  },
+  {
+    "internalName": "ADO_Iteration",
+    "displayName": "ADO_Iteration",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "ADO iteration path (for sync filter)"
+  },
+  {
+    "internalName": "ADO_QueryId",
+    "displayName": "ADO_QueryId",
+    "type": "Text",
+    "maxLength": 255,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Saved ADO WIQL query ID for bulk sync"
+  },
+  {
+    "internalName": "Owner",
+    "displayName": "Owner",
+    "type": "User",
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Project owner"
+  },
+  {
+    "internalName": "ProjectStatus",
+    "displayName": "ProjectStatus",
+    "type": "Choice",
+    "required": true,
+    "indexed": true,
+    "defaultValue": "Active",
+    "choices": ["Not Started", "Active", "On Hold", "Completed", "Archived"],
+    "description": "Project lifecycle status"
+  },
+  {
+    "internalName": "StartDate",
+    "displayName": "StartDate",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Project start date"
+  },
+  {
+    "internalName": "EndDate",
+    "displayName": "EndDate",
+    "type": "DateTime",
+    "dateOnly": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Project end date"
+  },
+  {
+    "internalName": "BucketDefinitions",
+    "displayName": "BucketDefinitions",
+    "type": "Note",
+    "richText": false,
+    "required": false,
+    "indexed": false,
+    "defaultValue": "[\"Backlog\",\"To Do\",\"In Progress\",\"Review\",\"Done\"]",
+    "description": "JSON array of Kanban column names"
+  },
+  {
+    "internalName": "Description",
+    "displayName": "Description",
+    "type": "Note",
+    "richText": true,
+    "required": false,
+    "indexed": false,
+    "defaultValue": null,
+    "description": "Project description"
+  },
+  {
+    "internalName": "TaskCount",
+    "displayName": "TaskCount",
+    "type": "Number",
+    "decimals": 0,
+    "required": false,
+    "indexed": false,
+    "defaultValue": 0,
+    "description": "Cached count (updated by aggregation flow)"
+  }
+]
