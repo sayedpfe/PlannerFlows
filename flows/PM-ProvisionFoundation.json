@@ -1,0 +1,311 @@
+{
+  "name": "PM-ProvisionFoundation",
+  "description": "One-time setup flow: creates ProjectRegistry, TaskTemplate, and ResourceCapacity lists with all columns, indexes, and views. Run this once on the target SharePoint site.",
+  "trigger": {
+    "type": "Manual (Instant - manually trigger a flow)",
+    "inputs": [
+      {
+        "name": "SiteUrl",
+        "type": "Text",
+        "required": true,
+        "description": "SharePoint site URL (e.g. https://contoso.sharepoint.com/sites/project-management)"
+      }
+    ]
+  },
+  "connectionReferences": {
+    "SharePoint": "shared_sharepointonline"
+  },
+  "overview": "This flow creates 3 SharePoint lists using 'Send an HTTP request to SharePoint' actions. Each section below is one action in the flow. Copy them in order.",
+
+  "actions": [
+    {
+      "step": "1",
+      "name": "Create_ProjectRegistry_List",
+      "action": "Send an HTTP request to SharePoint",
+      "site": "@{triggerBody()['text']}",
+      "method": "POST",
+      "uri": "/_api/web/lists",
+      "headers": {
+        "Accept": "application/json;odata=nometadata",
+        "Content-Type": "application/json;odata=nometadata"
+      },
+      "body": {
+        "__metadata": { "type": "SP.List" },
+        "Title": "ProjectRegistry",
+        "BaseTemplate": 100,
+        "ContentTypesEnabled": false,
+        "Description": "Master registry of all projects for the PM solution"
+      }
+    },
+    {
+      "step": "2",
+      "name": "Add_ProjectRegistry_Columns",
+      "action": "Send an HTTP request to SharePoint (run for EACH column below)",
+      "note": "Title column already exists. Create each of these by sending POST to /_api/web/lists/getbytitle('ProjectRegistry')/fields",
+      "site": "@{triggerBody()['text']}",
+      "method": "POST",
+      "uri": "/_api/web/lists/getbytitle('ProjectRegistry')/fields",
+      "columns": [
+        {
+          "name": "ProjectListName",
+          "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ProjectListName", "StaticName": "ProjectListName", "InternalName": "ProjectListName", "MaxLength": 255, "Required": true }
+        },
+        {
+          "name": "ADO_Project",
+          "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_Project", "StaticName": "ADO_Project", "InternalName": "ADO_Project", "MaxLength": 255 }
+        },
+        {
+          "name": "ADO_AreaPath",
+          "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_AreaPath", "StaticName": "ADO_AreaPath", "InternalName": "ADO_AreaPath", "MaxLength": 255 }
+        },
+        {
+          "name": "ADO_Iteration",
+          "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_Iteration", "StaticName": "ADO_Iteration", "InternalName": "ADO_Iteration", "MaxLength": 255 }
+        },
+        {
+          "name": "ADO_QueryId",
+          "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_QueryId", "StaticName": "ADO_QueryId", "InternalName": "ADO_QueryId", "MaxLength": 255 }
+        },
+        {
+          "name": "Owner",
+          "body": { "__metadata": { "type": "SP.FieldUser" }, "FieldTypeKind": 20, "Title": "Owner", "StaticName": "Owner", "InternalName": "Owner", "SelectionMode": 0 }
+        },
+        {
+          "name": "ProjectStatus",
+          "body": { "__metadata": { "type": "SP.FieldChoice" }, "FieldTypeKind": 6, "Title": "ProjectStatus", "StaticName": "ProjectStatus", "InternalName": "ProjectStatus", "Required": true, "DefaultValue": "Active", "Choices": { "results": ["Not Started", "Active", "On Hold", "Completed", "Archived"] } }
+        },
+        {
+          "name": "StartDate",
+          "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "StartDate", "StaticName": "StartDate", "InternalName": "StartDate", "DisplayFormat": 1 }
+        },
+        {
+          "name": "EndDate",
+          "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "EndDate", "StaticName": "EndDate", "InternalName": "EndDate", "DisplayFormat": 1 }
+        },
+        {
+          "name": "BucketDefinitions",
+          "body": { "__metadata": { "type": "SP.FieldMultiLineText" }, "FieldTypeKind": 3, "Title": "BucketDefinitions", "StaticName": "BucketDefinitions", "InternalName": "BucketDefinitions", "RichText": false, "NumberOfLines": 6 }
+        },
+        {
+          "name": "Description",
+          "body": { "__metadata": { "type": "SP.FieldMultiLineText" }, "FieldTypeKind": 3, "Title": "Description", "StaticName": "Description", "InternalName": "Description", "RichText": true, "NumberOfLines": 6 }
+        },
+        {
+          "name": "TaskCount",
+          "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "TaskCount", "StaticName": "TaskCount", "InternalName": "TaskCount", "DefaultValue": "0", "MinimumValue": 0 }
+        }
+      ]
+    },
+    {
+      "step": "3",
+      "name": "Index_ProjectRegistry_Columns",
+      "action": "Send an HTTP request to SharePoint (run for EACH column below)",
+      "note": "Set Indexed=true on key columns for delegation performance",
+      "site": "@{triggerBody()['text']}",
+      "method": "PATCH",
+      "columns_to_index": ["Title", "ProjectListName", "ADO_Project", "ADO_AreaPath", "ProjectStatus"],
+      "uri_template": "/_api/web/lists/getbytitle('ProjectRegistry')/fields/getbytitle('{columnName}')",
+      "body": { "Indexed": true }
+    },
+    {
+      "step": "4",
+      "name": "Create_ProjectRegistry_Views",
+      "action": "Send an HTTP request to SharePoint",
+      "views": [
+        {
+          "name": "Active Projects",
+          "uri": "/_api/web/lists/getbytitle('ProjectRegistry')/views",
+          "body": {
+            "__metadata": { "type": "SP.View" },
+            "Title": "Active Projects",
+            "PersonalView": false,
+            "ViewQuery": "<Where><Eq><FieldRef Name='ProjectStatus'/><Value Type='Choice'>Active</Value></Eq></Where><OrderBy><FieldRef Name='Title' Ascending='TRUE'/></OrderBy>",
+            "ViewFields": { "results": ["Title", "ProjectListName", "Owner", "ProjectStatus", "StartDate", "EndDate", "TaskCount"] },
+            "RowLimit": 100,
+            "DefaultView": true
+          }
+        },
+        {
+          "name": "My Projects",
+          "uri": "/_api/web/lists/getbytitle('ProjectRegistry')/views",
+          "body": {
+            "__metadata": { "type": "SP.View" },
+            "Title": "My Projects",
+            "PersonalView": false,
+            "ViewQuery": "<Where><Eq><FieldRef Name='Owner'/><Value Type='Integer'><UserID/></Value></Eq></Where>",
+            "ViewFields": { "results": ["Title", "ProjectListName", "Owner", "ProjectStatus", "StartDate", "EndDate", "TaskCount"] },
+            "RowLimit": 100
+          }
+        }
+      ]
+    },
+    {
+      "step": "5",
+      "name": "Create_TaskTemplate_List",
+      "action": "Send an HTTP request to SharePoint",
+      "site": "@{triggerBody()['text']}",
+      "method": "POST",
+      "uri": "/_api/web/lists",
+      "body": {
+        "__metadata": { "type": "SP.List" },
+        "Title": "TaskTemplate",
+        "BaseTemplate": 100,
+        "ContentTypesEnabled": false,
+        "Description": "Template list for per-project task lists. Do not add items here — this schema is cloned for each new project."
+      }
+    },
+    {
+      "step": "6",
+      "name": "Add_TaskTemplate_Columns",
+      "action": "Send an HTTP request to SharePoint (run for EACH column below)",
+      "site": "@{triggerBody()['text']}",
+      "method": "POST",
+      "uri": "/_api/web/lists/getbytitle('TaskTemplate')/fields",
+      "columns": [
+        { "name": "OutlineLevel", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "OutlineLevel", "StaticName": "OutlineLevel", "InternalName": "OutlineLevel", "Required": true, "DefaultValue": "1", "MinimumValue": 1 } },
+        { "name": "ParentTaskId", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "ParentTaskId", "StaticName": "ParentTaskId", "InternalName": "ParentTaskId", "MinimumValue": 0 } },
+        { "name": "SortOrder", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "SortOrder", "StaticName": "SortOrder", "InternalName": "SortOrder", "Required": true, "DefaultValue": "0", "MinimumValue": 0 } },
+        { "name": "PSP", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "PSP", "StaticName": "PSP", "InternalName": "PSP", "MaxLength": 50 } },
+        { "name": "PercentComplete", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "PercentComplete", "StaticName": "PercentComplete", "InternalName": "PercentComplete", "DefaultValue": "0", "MinimumValue": 0, "MaximumValue": 100 } },
+        { "name": "Priority", "body": { "__metadata": { "type": "SP.FieldChoice" }, "FieldTypeKind": 6, "Title": "Priority", "StaticName": "Priority", "InternalName": "Priority", "DefaultValue": "Medium", "Choices": { "results": ["Critical", "High", "Medium", "Low"] } } },
+        { "name": "Status", "body": { "__metadata": { "type": "SP.FieldChoice" }, "FieldTypeKind": 6, "Title": "Status", "StaticName": "Status", "InternalName": "Status", "Required": true, "DefaultValue": "Not Started", "Choices": { "results": ["Not Started", "In Progress", "Completed", "Blocked", "Cancelled"] } } },
+        { "name": "Bucket", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "Bucket", "StaticName": "Bucket", "InternalName": "Bucket", "MaxLength": 100, "DefaultValue": "Backlog" } },
+        { "name": "Start", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "Start", "StaticName": "Start", "InternalName": "Start", "DisplayFormat": 1 } },
+        { "name": "EndDate", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "EndDate", "StaticName": "EndDate", "InternalName": "EndDate", "DisplayFormat": 1 } },
+        { "name": "Duration", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "Duration", "StaticName": "Duration", "InternalName": "Duration", "MinimumValue": 0 } },
+        { "name": "Start_Baseline", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "Start_Baseline", "StaticName": "Start_Baseline", "InternalName": "Start_Baseline", "DisplayFormat": 1 } },
+        { "name": "End_Baseline", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "End_Baseline", "StaticName": "End_Baseline", "InternalName": "End_Baseline", "DisplayFormat": 1 } },
+        { "name": "Predecessor", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "Predecessor", "StaticName": "Predecessor", "InternalName": "Predecessor", "MaxLength": 255 } },
+        { "name": "AssignedTo", "body": { "__metadata": { "type": "SP.FieldUser" }, "FieldTypeKind": 20, "Title": "AssignedTo", "StaticName": "AssignedTo", "InternalName": "AssignedTo", "SelectionMode": 0, "AllowMultipleValues": true } },
+        { "name": "ADO_ID", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "ADO_ID", "StaticName": "ADO_ID", "InternalName": "ADO_ID", "MinimumValue": 0 } },
+        { "name": "ADO_State", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_State", "StaticName": "ADO_State", "InternalName": "ADO_State", "MaxLength": 100 } },
+        { "name": "ADO_WorkItemType", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_WorkItemType", "StaticName": "ADO_WorkItemType", "InternalName": "ADO_WorkItemType", "MaxLength": 100 } },
+        { "name": "ADO_AreaPath", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_AreaPath", "StaticName": "ADO_AreaPath", "InternalName": "ADO_AreaPath", "MaxLength": 255 } },
+        { "name": "ADO_IterationPath", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_IterationPath", "StaticName": "ADO_IterationPath", "InternalName": "ADO_IterationPath", "MaxLength": 255 } },
+        { "name": "ADO_Responsible", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_Responsible", "StaticName": "ADO_Responsible", "InternalName": "ADO_Responsible", "MaxLength": 255 } },
+        { "name": "ADO_BO_ID", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ADO_BO_ID", "StaticName": "ADO_BO_ID", "InternalName": "ADO_BO_ID", "MaxLength": 100 } },
+        { "name": "LastSyncTimestamp", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "LastSyncTimestamp", "StaticName": "LastSyncTimestamp", "InternalName": "LastSyncTimestamp", "DisplayFormat": 0 } },
+        { "name": "SyncError", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "SyncError", "StaticName": "SyncError", "InternalName": "SyncError", "MaxLength": 255 } },
+        { "name": "Notes", "body": { "__metadata": { "type": "SP.FieldMultiLineText" }, "FieldTypeKind": 3, "Title": "Notes", "StaticName": "Notes", "InternalName": "Notes", "RichText": true, "NumberOfLines": 6 } }
+      ]
+    },
+    {
+      "step": "7",
+      "name": "Index_TaskTemplate_Columns",
+      "action": "Send an HTTP request to SharePoint (PATCH for EACH column)",
+      "site": "@{triggerBody()['text']}",
+      "method": "PATCH",
+      "columns_to_index": ["Title", "OutlineLevel", "ParentTaskId", "Status", "Bucket", "ADO_ID", "ADO_AreaPath"],
+      "uri_template": "/_api/web/lists/getbytitle('TaskTemplate')/fields/getbytitle('{columnName}')",
+      "body": { "Indexed": true }
+    },
+    {
+      "step": "8",
+      "name": "Create_ResourceCapacity_List",
+      "action": "Send an HTTP request to SharePoint",
+      "site": "@{triggerBody()['text']}",
+      "method": "POST",
+      "uri": "/_api/web/lists",
+      "body": {
+        "__metadata": { "type": "SP.List" },
+        "Title": "ResourceCapacity",
+        "BaseTemplate": 100,
+        "ContentTypesEnabled": false,
+        "Description": "Cross-project resource capacity aggregation. Updated daily by PM-AggregateResourceData flow."
+      }
+    },
+    {
+      "step": "9",
+      "name": "Add_ResourceCapacity_Columns",
+      "action": "Send an HTTP request to SharePoint (run for EACH column below)",
+      "site": "@{triggerBody()['text']}",
+      "method": "POST",
+      "uri": "/_api/web/lists/getbytitle('ResourceCapacity')/fields",
+      "columns": [
+        { "name": "PersonName", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "PersonName", "StaticName": "PersonName", "InternalName": "PersonName", "MaxLength": 255, "Required": true } },
+        { "name": "PersonEmail", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "PersonEmail", "StaticName": "PersonEmail", "InternalName": "PersonEmail", "MaxLength": 255, "Required": true } },
+        { "name": "ProjectName", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ProjectName", "StaticName": "ProjectName", "InternalName": "ProjectName", "MaxLength": 255, "Required": true } },
+        { "name": "ProjectListName", "body": { "__metadata": { "type": "SP.Field" }, "FieldTypeKind": 2, "Title": "ProjectListName", "StaticName": "ProjectListName", "InternalName": "ProjectListName", "MaxLength": 255 } },
+        { "name": "TaskCount", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "TaskCount", "StaticName": "TaskCount", "InternalName": "TaskCount", "DefaultValue": "0", "MinimumValue": 0 } },
+        { "name": "TotalDuration", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "TotalDuration", "StaticName": "TotalDuration", "InternalName": "TotalDuration", "DefaultValue": "0", "MinimumValue": 0 } },
+        { "name": "CompletedTasks", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "CompletedTasks", "StaticName": "CompletedTasks", "InternalName": "CompletedTasks", "DefaultValue": "0", "MinimumValue": 0 } },
+        { "name": "EarliestStart", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "EarliestStart", "StaticName": "EarliestStart", "InternalName": "EarliestStart", "DisplayFormat": 1 } },
+        { "name": "LatestEnd", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "LatestEnd", "StaticName": "LatestEnd", "InternalName": "LatestEnd", "DisplayFormat": 1 } },
+        { "name": "AvgPercentComplete", "body": { "__metadata": { "type": "SP.FieldNumber" }, "FieldTypeKind": 1, "Title": "AvgPercentComplete", "StaticName": "AvgPercentComplete", "InternalName": "AvgPercentComplete", "DefaultValue": "0", "MinimumValue": 0, "MaximumValue": 100 } },
+        { "name": "LastUpdated", "body": { "__metadata": { "type": "SP.FieldDateTime" }, "FieldTypeKind": 4, "Title": "LastUpdated", "StaticName": "LastUpdated", "InternalName": "LastUpdated", "DisplayFormat": 0 } }
+      ]
+    },
+    {
+      "step": "10",
+      "name": "Index_ResourceCapacity_Columns",
+      "action": "Send an HTTP request to SharePoint (PATCH for EACH column)",
+      "site": "@{triggerBody()['text']}",
+      "method": "PATCH",
+      "columns_to_index": ["PersonName", "PersonEmail"],
+      "uri_template": "/_api/web/lists/getbytitle('ResourceCapacity')/fields/getbytitle('{columnName}')",
+      "body": { "Indexed": true }
+    },
+    {
+      "step": "11",
+      "name": "Create_SampleProject",
+      "action": "SharePoint - Create item",
+      "note": "Optional: creates a sample entry in ProjectRegistry for testing",
+      "list": "ProjectRegistry",
+      "body": {
+        "Title": "Test Project",
+        "ProjectListName": "Tasks_Test_Project",
+        "ProjectStatus": "Active",
+        "BucketDefinitions": "[\"Backlog\",\"To Do\",\"In Progress\",\"Review\",\"Done\"]"
+      }
+    },
+    {
+      "step": "12",
+      "name": "Respond_Success",
+      "action": "Respond to a PowerApp or flow",
+      "outputs": {
+        "status": "Success",
+        "message": "Created 3 lists: ProjectRegistry (13 cols, 5 indexes), TaskTemplate (26 cols, 7 indexes), ResourceCapacity (11 cols, 2 indexes)",
+        "siteUrl": "@{triggerBody()['text']}"
+      }
+    }
+  ],
+
+  "flowBuildGuide": {
+    "title": "How to build this flow in Power Automate",
+    "steps": [
+      "1. Go to make.powerautomate.com → My flows → New flow → Instant cloud flow",
+      "2. Name: 'PM-ProvisionFoundation'",
+      "3. Trigger: 'Manually trigger a flow' → Add input → Text → Name: 'SiteUrl'",
+      "4. For each step below, add 'Send an HTTP request to SharePoint':",
+      "",
+      "STEP 1 — Create ProjectRegistry list:",
+      "  Site: @{triggerBody()['text']}",
+      "  Method: POST",
+      "  URI: /_api/web/lists",
+      "  Headers: Accept = application/json;odata=nometadata, Content-Type = application/json;odata=nometadata",
+      "  Body: copy from step 1 above",
+      "",
+      "STEP 2 — Add columns (use Apply_to_each or individual actions):",
+      "  For EACH column in step 2.columns array above:",
+      "    Method: POST",
+      "    URI: /_api/web/lists/getbytitle('ProjectRegistry')/fields",
+      "    Body: the column's body object",
+      "",
+      "STEP 3 — Index columns:",
+      "  For EACH column in ['Title','ProjectListName','ADO_Project','ADO_AreaPath','ProjectStatus']:",
+      "    Method: PATCH",
+      "    URI: /_api/web/lists/getbytitle('ProjectRegistry')/fields/getbytitle('{column}')",
+      "    Headers: Add 'IF-MATCH' = '*' and 'X-HTTP-Method' = 'MERGE'",
+      "    Body: { \"Indexed\": true }",
+      "",
+      "Repeat steps 5-7 for TaskTemplate, steps 8-10 for ResourceCapacity.",
+      "",
+      "TIP: To reduce the number of actions, use a Compose action to build an array of column definitions, then Apply_to_each to loop through and create them.",
+      "",
+      "IMPORTANT: All 'Send an HTTP request to SharePoint' actions need these headers:",
+      "  Accept: application/json;odata=nometadata",
+      "  Content-Type: application/json;odata=nometadata",
+      "  For PATCH (index) also add: IF-MATCH: *, X-HTTP-Method: MERGE"
+    ]
+  }
+}

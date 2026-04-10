@@ -1,0 +1,146 @@
+{
+  "name": "PM-CreateProjectList",
+  "description": "Called from Power App 'New Project' button. Creates a new SP list cloning the TaskTemplate schema, adds indexes, and registers the project in ProjectRegistry.",
+  "trigger": {
+    "type": "PowerApps (V2)",
+    "inputs": [
+      { "name": "SiteUrl", "type": "Text", "required": true, "description": "SharePoint site URL" },
+      { "name": "ProjectName", "type": "Text", "required": true },
+      { "name": "ADO_Project", "type": "Text", "required": false },
+      { "name": "ADO_AreaPath", "type": "Text", "required": false },
+      { "name": "ADO_Iteration", "type": "Text", "required": false },
+      { "name": "ADO_QueryId", "type": "Text", "required": false },
+      { "name": "OwnerEmail", "type": "Text", "required": false },
+      { "name": "StartDate", "type": "Text", "required": false },
+      { "name": "EndDate", "type": "Text", "required": false },
+      { "name": "BucketDefinitions", "type": "Text", "required": false, "default": "[\"Backlog\",\"To Do\",\"In Progress\",\"Review\",\"Done\"]" }
+    ]
+  },
+  "connectionReferences": {
+    "SharePoint": "shared_sharepointonline"
+  },
+
+  "variables": [
+    {
+      "name": "varProjectListName",
+      "type": "String",
+      "value": "concat('Tasks_', replace(replace(replace(triggerBody()['text_1'], ' ', '_'), '/', '_'), '\\\\', '_'))"
+    }
+  ],
+
+  "actions": [
+    {
+      "step": "1",
+      "name": "Compose_ListName",
+      "action": "Compose",
+      "expression": "concat('Tasks_', replace(replace(replace(triggerBody()['text_1'], ' ', '_'), '/', '_'), '\\', '_'))",
+      "note": "Sanitize project name → list name. E.g. 'Wave One / FA' → 'Tasks_Wave_One___FA'"
+    },
+    {
+      "step": "2",
+      "name": "Create_List",
+      "action": "Send an HTTP request to SharePoint",
+      "site": "@{triggerBody()['text']}",
+      "method": "POST",
+      "uri": "/_api/web/lists",
+      "headers": {
+        "Accept": "application/json;odata=nometadata",
+        "Content-Type": "application/json;odata=nometadata"
+      },
+      "body": {
+        "__metadata": { "type": "SP.List" },
+        "Title": "@{outputs('Compose_ListName')}",
+        "BaseTemplate": 100,
+        "ContentTypesEnabled": false,
+        "Description": "@{concat('Task list for project: ', triggerBody()['text_1'])}"
+      }
+    },
+    {
+      "step": "3",
+      "name": "Get_TaskTemplate_Fields",
+      "action": "Send an HTTP request to SharePoint",
+      "site": "@{triggerBody()['text']}",
+      "method": "GET",
+      "uri": "/_api/web/lists/getbytitle('TaskTemplate')/fields?$filter=Hidden eq false and ReadOnlyField eq false and InternalName ne 'ContentType' and InternalName ne 'Attachments'&$select=InternalName,TypeAsString,Title,Required,DefaultValue,MaxLength,Choices,RichText,NumberOfLines,AllowMultipleValues,DisplayFormat,MinimumValue,MaximumValue,FieldTypeKind",
+      "note": "Read all custom fields from TaskTemplate to clone them to the new list"
+    },
+    {
+      "step": "4",
+      "name": "Apply_to_each_field",
+      "action": "Apply to each",
+      "items": "@{body('Get_TaskTemplate_Fields')['value']}",
+      "note": "For each custom field from TaskTemplate, skip built-in fields (Title, ID, Created, Modified, etc.), then create the field on the new list",
+      "builtInFieldsToSkip": ["Title", "ID", "Created", "Modified", "Author", "Editor", "ContentType", "Attachments", "_ModerationStatus", "_ModerationComments", "LinkTitle", "LinkTitleNoMenu", "Edit", "DocIcon", "ItemChildCount", "FolderChildCount", "AppAuthor", "AppEditor", "ComplianceAssetId", "_ComplianceFlags", "_ComplianceTag", "_ComplianceTagWrittenTime", "_ComplianceTagUserId", "SMTotalFileStreamSize", "SMTotalFileCount", "SMLastModifiedDate"],
+      "subaction": {
+        "name": "Create_Field_on_New_List",
+        "action": "Send an HTTP request to SharePoint",
+        "site": "@{triggerBody()['text']}",
+        "method": "POST",
+        "uri": "/_api/web/lists/getbytitle('@{outputs('Compose_ListName')}')/fields",
+        "body": "@{items('Apply_to_each_field')}",
+        "note": "Pass the field definition as-is from TaskTemplate"
+      }
+    },
+    {
+      "step": "5",
+      "name": "Index_Key_Columns",
+      "action": "Apply to each (or individual PATCH actions)",
+      "items": ["Title", "OutlineLevel", "ParentTaskId", "Status", "Bucket", "ADO_ID", "ADO_AreaPath"],
+      "subaction": {
+        "action": "Send an HTTP request to SharePoint",
+        "method": "PATCH",
+        "uri": "/_api/web/lists/getbytitle('@{outputs('Compose_ListName')}')/fields/getbytitle('@{items('Apply_to_each')}')",
+        "headers": {
+          "Accept": "application/json;odata=nometadata",
+          "Content-Type": "application/json;odata=nometadata",
+          "IF-MATCH": "*",
+          "X-HTTP-Method": "MERGE"
+        },
+        "body": { "Indexed": true }
+      }
+    },
+    {
+      "step": "6",
+      "name": "Register_in_ProjectRegistry",
+      "action": "SharePoint - Create item",
+      "site": "@{triggerBody()['text']}",
+      "list": "ProjectRegistry",
+      "body": {
+        "Title": "@{triggerBody()['text_1']}",
+        "ProjectListName": "@{outputs('Compose_ListName')}",
+        "ADO_Project": "@{triggerBody()['text_2']}",
+        "ADO_AreaPath": "@{triggerBody()['text_3']}",
+        "ADO_Iteration": "@{triggerBody()['text_4']}",
+        "ADO_QueryId": "@{triggerBody()['text_5']}",
+        "ProjectStatus": "Active",
+        "StartDate": "@{triggerBody()['text_7']}",
+        "EndDate": "@{triggerBody()['text_8']}",
+        "BucketDefinitions": "@{if(empty(triggerBody()['text_9']), '[\"Backlog\",\"To Do\",\"In Progress\",\"Review\",\"Done\"]', triggerBody()['text_9'])}",
+        "TaskCount": 0
+      },
+      "note": "Owner is set separately via SP HTTP PATCH if OwnerEmail is provided (Person fields need user lookup)"
+    },
+    {
+      "step": "7",
+      "name": "Respond_to_PowerApp",
+      "action": "Respond to a PowerApp or flow",
+      "outputs": {
+        "ProjectListName": "@{outputs('Compose_ListName')}",
+        "ProjectId": "@{body('Register_in_ProjectRegistry')['ID']}",
+        "Status": "Success"
+      }
+    }
+  ],
+
+  "errorHandling": {
+    "scope": "Try-Catch pattern",
+    "onFailure": {
+      "action": "Respond to a PowerApp or flow",
+      "outputs": {
+        "ProjectListName": "",
+        "ProjectId": "",
+        "Status": "Error: @{result('Create_List')?['error']?['message']}"
+      }
+    }
+  }
+}
