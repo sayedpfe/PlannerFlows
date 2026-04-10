@@ -2,13 +2,15 @@
 <ImportExportXml version="9.1.0.643" SolutionPackageVersion="9.1" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SolutionManifest>
     <!-- Unique Name of Cds Solution-->
-    <UniqueName>MSDEModernTable</UniqueName>
+    <UniqueName>ProjectMgmt</UniqueName>
     <LocalizedNames>
       <!-- Localized Solution Name in language code -->
-      <LocalizedName description="MSDE Modern Table" languagecode="1033" />
+      <LocalizedName description="Project Management" languagecode="1033" />
     </LocalizedNames>
-    <Descriptions />
-    <Version>3.6.0</Version>
+    <Descriptions>
+      <Description description="Project Management PCF controls: ModernTable v4.0 (tree/hierarchy grid) and GanttChart v1.0" languagecode="1033" />
+    </Descriptions>
+    <Version>4.0.0</Version>
     <!-- Solution Package Type: Unmanaged(0)/Managed(1)/Both(2)-->
     <Managed>0</Managed>
     <Publisher>
