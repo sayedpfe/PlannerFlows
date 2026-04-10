@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+obj/
+bin/
+
+# PCF generated
+ResourceAssignmentTable/generated/ManifestTypes.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.suo
+*.user
+*.sln.docstates

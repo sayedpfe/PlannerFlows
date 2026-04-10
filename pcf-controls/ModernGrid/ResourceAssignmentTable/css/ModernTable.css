@@ -1,0 +1,107 @@
+/* ═══════════════════════════════════════════════════
+   ModernTable — PCF Control Styles
+   ═══════════════════════════════════════════════════ */
+
+/* Animation keyframes */
+@keyframes pcf-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reset box-sizing for the control */
+.modern-table-root,
+.modern-table-root *,
+.modern-table-root *::before,
+.modern-table-root *::after {
+  box-sizing: border-box;
+}
+
+/* Scrollbar styling */
+.modern-table__scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.modern-table__scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.modern-table__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Row hover effect */
+.table-row:hover {
+  background: #fafbfe;
+}
+
+/* Resize handle active state — applied via JS */
+.resize-handle:active {
+  background: #3b82f6 !important;
+}
+
+/* Focus visible for keyboard accessibility */
+.modern-table-root input:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+}
+
+.modern-table-root button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+}
+
+/* Multi-select dropdown animation */
+.multi-select__dropdown {
+  animation: pcf-fadeIn 0.12s ease-out;
+}
+
+/* Filter popover animation */
+.filter-popover {
+  animation: pcf-fadeIn 0.12s ease-out;
+}
+
+/* Resource chip hover effect */
+.resource-chip:hover {
+  filter: brightness(0.97);
+}
+
+/* Badge styling consistency */
+.badge {
+  display: inline-block;
+  line-height: 1.4;
+}
+
+/* Responsive: hide less important columns on narrow containers */
+@container (max-width: 600px) {
+  .modern-table-root th:nth-child(n+4),
+  .modern-table-root td:nth-child(n+4) {
+    display: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .modern-table__toolbar {
+    display: none !important;
+  }
+
+  .multi-select__trigger {
+    border: none !important;
+  }
+
+  .resize-handle {
+    display: none !important;
+  }
+
+  .table-row:hover {
+    background: transparent !important;
+  }
+}

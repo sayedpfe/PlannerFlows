@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="MSDE" constructor="ModernTable" version="4.0.0" display-name-key="ModernTable v4.0" description-key="A generic modern table component with tree/hierarchy view, resizable columns, sorting, filtering, per-column inline editing, progress bars, row selection, and optional resource assignment. Works with any data source." control-type="virtual" >
+
+    <!-- Primary data set: binds to any SharePoint list or Dataverse table -->
+    <data-set name="dataSet" display-name-key="Data Source" description-key="The data source to display (SharePoint list, Dataverse table, or collection)">
+    </data-set>
+
+    <!-- People column configuration (optional) -->
+    <property name="resourceColumnName" display-name-key="People Column Name" description-key="Internal name of the People/Person column in this list (e.g. AssignedTo). Leave empty if no people column." of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- Tree/hierarchy configuration (optional — leave all blank for flat table) -->
+    <property name="outlineLevelColumn" display-name-key="Outline Level Column" description-key="Column name containing the WBS depth number (e.g. OutlineLevel). Leave empty for flat table." of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="parentIdColumn" display-name-key="Parent ID Column" description-key="Column name containing the parent item ID (e.g. ParentTaskId). Leave empty for flat table." of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="sortOrderColumn" display-name-key="Sort Order Column" description-key="Column name for sibling sort order (e.g. SortOrder). Leave empty for flat table." of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- Percent/progress bar column (optional) -->
+    <property name="percentColumnName" display-name-key="Percent Column Name" description-key="Column name to render as a progress bar (e.g. PercentComplete). Leave empty to render as a plain number." of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- Feature toggles -->
+    <property name="enableResize" display-name-key="Enable Column Resize" description-key="Allow users to resize columns" of-type="TwoOptions" usage="input" required="false" default-value="true" />
+    <property name="enableSort" display-name-key="Enable Sorting" description-key="Allow users to sort columns" of-type="TwoOptions" usage="input" required="false" default-value="true" />
+    <property name="enableFilter" display-name-key="Enable Filtering" description-key="Allow users to filter columns" of-type="TwoOptions" usage="input" required="false" default-value="true" />
+    <property name="enableSearch" display-name-key="Enable Search" description-key="Show global search bar" of-type="TwoOptions" usage="input" required="false" default-value="true" />
+    <property name="enableSelection" display-name-key="Enable Row Selection" description-key="Show row selection checkboxes" of-type="TwoOptions" usage="input" required="false" default-value="false" />
+    <property name="enableInlineCreate" display-name-key="Enable Inline Create" description-key="Show an add-task row at the bottom of the table" of-type="TwoOptions" usage="input" required="false" default-value="false" />
+    <property name="editableColumns" display-name-key="Editable Columns" description-key="Comma-separated column names that should be editable (e.g. Title,Status,DueDate). Leave empty for read-only." of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="tableHeight" display-name-key="Table Height" description-key="Height of the table in pixels (0 = auto)" of-type="Whole.None" usage="input" required="false" default-value="0" />
+
+    <!-- People search: input from Power Apps (AD search results) -->
+    <property name="peopleSearchResults" display-name-key="People Search Results" description-key="JSON array of people from AD search. Format: [{id, name, email, role}]. Bind to: JSON(Office365Users.SearchUser({searchTerm: Self.peopleSearchQuery}))" of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- Output events -->
+    <property name="onCellChange" display-name-key="On Cell Change" description-key="Event raised when a cell value changes (editing or resource assignment)" of-type="SingleLine.Text" usage="output" />
+    <property name="peopleSearchQuery" display-name-key="People Search Query" description-key="Output: search text typed by user in the people picker. Use to search AD via Office365Users connector." of-type="SingleLine.Text" usage="output" />
+    <property name="selectedItems" display-name-key="Selected Items" description-key="JSON array of selected row IDs when row selection is enabled." of-type="SingleLine.Text" usage="output" />
+    <property name="onTaskCreate" display-name-key="On Task Create" description-key="Event raised when user creates a task via inline add. JSON: {parentId, title, outlineLevel}" of-type="SingleLine.Text" usage="output" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <platform-library name="React" version="16.8.6" />
+      <platform-library name="Fluent" version="9.46.2" />
+      <css path="css/ModernTable.css" order="1" />
+    </resources>
+  </control>
+</manifest>
