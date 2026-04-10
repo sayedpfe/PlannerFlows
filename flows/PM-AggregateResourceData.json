@@ -1,0 +1,163 @@
+{
+  "name": "PM-AggregateResourceData",
+  "description": "Scheduled daily flow (or manual trigger). Aggregates resource assignments across all active projects into the ResourceCapacity SP list for cross-project utilization views.",
+  "trigger": {
+    "type": "Recurrence",
+    "frequency": "Day",
+    "interval": 1,
+    "startTime": "02:00 UTC",
+    "note": "Also add a manual trigger option (Instant) for on-demand refresh"
+  },
+  "inputs": [
+    { "name": "SiteUrl", "type": "Text", "hardcoded": "https://basf.sharepoint.com/sites/ngba-gb-planner-projects" }
+  ],
+  "connectionReferences": {
+    "SharePoint": "shared_sharepointonline"
+  },
+  "concurrency": { "runs": 1 },
+
+  "actions": [
+    {
+      "step": "1",
+      "name": "Delete_All_ResourceCapacity_Items",
+      "action": "Send an HTTP request to SharePoint",
+      "note": "Clear the ResourceCapacity list for full refresh. Use batch delete or loop.",
+      "method": "GET",
+      "uri": "/_api/web/lists/getbytitle('ResourceCapacity')/items?$select=Id&$top=5000",
+      "then": {
+        "action": "Apply_to_each → Send an HTTP request to SharePoint",
+        "method": "POST",
+        "uri": "/_api/web/lists/getbytitle('ResourceCapacity')/items(@{items('Apply_to_each')['Id']})",
+        "headers": { "IF-MATCH": "*", "X-HTTP-Method": "DELETE" }
+      }
+    },
+    {
+      "step": "2",
+      "name": "Get_Active_Projects",
+      "action": "SharePoint - Get items",
+      "list": "ProjectRegistry",
+      "filter": "ProjectStatus eq 'Active'",
+      "select": "Title,ProjectListName",
+      "top": 5000
+    },
+    {
+      "step": "3",
+      "name": "For_Each_Project",
+      "action": "Apply to each",
+      "items": "@{body('Get_Active_Projects')['value']}",
+      "concurrency": 1,
+      "subactions": [
+        {
+          "step": "3.1",
+          "name": "Get_Project_Tasks",
+          "action": "Send an HTTP request to SharePoint",
+          "method": "GET",
+          "uri": "/_api/web/lists/getbytitle('@{items('For_Each_Project')['ProjectListName']}')/items?$select=Id,AssignedTo,Duration,Start,EndDate,PercentComplete,Status&$top=5000"
+        },
+        {
+          "step": "3.2",
+          "name": "Update_TaskCount",
+          "action": "SharePoint - Update item",
+          "list": "ProjectRegistry",
+          "id": "@{items('For_Each_Project')['ID']}",
+          "body": {
+            "TaskCount": "@{length(body('Get_Project_Tasks')['value'])}"
+          }
+        },
+        {
+          "step": "3.3",
+          "name": "Extract_Unique_People",
+          "action": "Select + Compose",
+          "note": "Extract distinct AssignedTo values from the task list. Handle Person column (may be object with DisplayName, Email) or text field.",
+          "expression": "union(/* distinct AssignedTo values from all tasks */)"
+        },
+        {
+          "step": "3.4",
+          "name": "For_Each_Person",
+          "action": "Apply to each (distinct people)",
+          "subactions": [
+            {
+              "step": "3.4.1",
+              "name": "Filter_Person_Tasks",
+              "action": "Filter array",
+              "from": "@{body('Get_Project_Tasks')['value']}",
+              "where": "AssignedTo contains currentPerson"
+            },
+            {
+              "step": "3.4.2",
+              "name": "Compute_Aggregates",
+              "action": "Compose",
+              "values": {
+                "TaskCount": "@{length(body('Filter_Person_Tasks'))}",
+                "TotalDuration": "sum of Duration across filtered tasks",
+                "CompletedTasks": "count where Status = 'Completed'",
+                "EarliestStart": "min(Start) across filtered tasks",
+                "LatestEnd": "max(EndDate) across filtered tasks",
+                "AvgPercentComplete": "average(PercentComplete) across filtered tasks"
+              }
+            },
+            {
+              "step": "3.4.3",
+              "name": "Create_ResourceCapacity_Item",
+              "action": "SharePoint - Create item",
+              "list": "ResourceCapacity",
+              "body": {
+                "Title": "@{currentPerson.DisplayName} — @{items('For_Each_Project')['Title']}",
+                "PersonName": "@{currentPerson.DisplayName}",
+                "PersonEmail": "@{currentPerson.Email}",
+                "ProjectName": "@{items('For_Each_Project')['Title']}",
+                "ProjectListName": "@{items('For_Each_Project')['ProjectListName']}",
+                "TaskCount": "@{outputs('Compute_Aggregates')['TaskCount']}",
+                "TotalDuration": "@{outputs('Compute_Aggregates')['TotalDuration']}",
+                "CompletedTasks": "@{outputs('Compute_Aggregates')['CompletedTasks']}",
+                "EarliestStart": "@{outputs('Compute_Aggregates')['EarliestStart']}",
+                "LatestEnd": "@{outputs('Compute_Aggregates')['LatestEnd']}",
+                "AvgPercentComplete": "@{outputs('Compute_Aggregates')['AvgPercentComplete']}",
+                "LastUpdated": "@{utcNow()}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "flowBuildGuide": {
+    "title": "How to build this flow in Power Automate",
+    "steps": [
+      "1. Create a Scheduled cloud flow — Recurrence: every 1 day at 02:00 UTC",
+      "2. Also add a second trigger: 'Manually trigger a flow' (for on-demand refresh)",
+      "",
+      "STEP 1 — Clear ResourceCapacity list:",
+      "  a. SP HTTP GET: /_api/web/lists/getbytitle('ResourceCapacity')/items?$select=Id&$top=5000",
+      "  b. Apply_to_each → SP HTTP POST with headers IF-MATCH:*, X-HTTP-Method:DELETE",
+      "     URI: /_api/web/lists/getbytitle('ResourceCapacity')/items({Id})",
+      "",
+      "STEP 2 — Get active projects:",
+      "  SharePoint 'Get items' → List: ProjectRegistry, Filter: ProjectStatus eq 'Active'",
+      "",
+      "STEP 3 — Loop each project:",
+      "  Apply_to_each (concurrency=1 to avoid throttling):",
+      "    3.1 SP HTTP GET tasks from the project's task list (use ProjectListName from the loop item)",
+      "    3.2 Update ProjectRegistry.TaskCount = length of tasks array",
+      "    3.3 Extract distinct people — this is the trickiest part:",
+      "        - If AssignedTo is a Person column: it returns {DisplayName, Email, Id}",
+      "        - If AssignedTo is a Text column: parse as-is",
+      "        - Use Select action to extract unique names, then union() to deduplicate",
+      "    3.4 For each person → Filter tasks → Compute aggregates → Create ResourceCapacity item",
+      "",
+      "AGGREGATE FORMULAS (use in Compose actions):",
+      "  TaskCount: @{length(body('Filter_Person_Tasks'))}",
+      "  CompletedTasks: @{length(filter(body('Filter_Person_Tasks'), item()?['Status'] eq 'Completed'))}",
+      "  TotalDuration: Use Select to extract Duration values, then sum (or loop + increment variable)",
+      "  AvgPercentComplete: divide(sum of PercentComplete, TaskCount)",
+      "  EarliestStart: min() — use Sort + first() pattern",
+      "  LatestEnd: max() — use Sort(desc) + first() pattern",
+      "",
+      "TIP: For sum/average in Power Automate without Dataverse:",
+      "  Initialize variable varSum (Float, 0)",
+      "  Apply_to_each task → Increment variable varSum by task.Duration",
+      "  After loop: varSum / count = average"
+    ]
+  }
+}

@@ -1,0 +1,557 @@
+{
+  "name": "Project Management Canvas App",
+  "description": "6-screen Canvas App for project task management. Backed by SharePoint Lists + ModernGrid + GanttChart PCF controls.",
+  "appSettings": {
+    "name": "Project Management",
+    "layout": "Tablet",
+    "theme": "Fluent Blue (Segoe UI)",
+    "dataSources": [
+      "ProjectRegistry (SharePoint list - direct binding)",
+      "ResourceCapacity (SharePoint list - direct binding)"
+    ],
+    "flows": [
+      "PM-CreateProjectList",
+      "PM-BulkSyncFromADO (Phase 4)",
+      "PM-SyncTaskToADO (Phase 4)",
+      "PM-LoadProjectTasks (helper flow to fetch tasks from dynamic list)"
+    ],
+    "pcfControls": [
+      "ModernGrid v4.0 (MSDE.ModernTable)",
+      "GanttChart v1.0 (MSDE.GanttChart)"
+    ]
+  },
+
+  "appOnStart": {
+    "formula": "Set(varCurrentProject, Blank()); Set(varProjectListName, \"\"); ClearCollect(colTasks, Blank()); ClearCollect(colBuckets, Blank()); Set(varSelectedPerson, \"\"); Set(varGanttViewMode, \"Week\"); Set(varShowBaseline, false)"
+  },
+
+  "navigation": {
+    "type": "Left sidebar icon rail (always visible)",
+    "width": 60,
+    "icons": [
+      { "icon": "Home", "screen": "scrHome", "label": "Home", "requiresProject": false },
+      { "icon": "BulletedTreeList", "screen": "scrTaskList", "label": "Tasks", "requiresProject": true },
+      { "icon": "Timeline", "screen": "scrGantt", "label": "Gantt", "requiresProject": true },
+      { "icon": "ViewAll", "screen": "scrBoard", "label": "Board", "requiresProject": true },
+      { "icon": "People", "screen": "scrResources", "label": "Resources", "requiresProject": true },
+      { "icon": "AreaChart", "screen": "scrDashboard", "label": "Dashboard", "requiresProject": true }
+    ],
+    "onSelect": "If(ThisItem.requiresProject && IsBlank(varCurrentProject), Notify(\"Select a project first\", NotificationType.Warning), Navigate(ThisItem.screen, ScreenTransition.None))"
+  },
+
+  "helperFlow_LoadProjectTasks": {
+    "name": "PM-LoadProjectTasks",
+    "description": "Helper flow needed because Canvas Apps can't dynamically bind to a SP list by name. This flow reads all items from a named SP list and returns them as JSON.",
+    "trigger": "PowerApps (V2)",
+    "inputs": [
+      { "name": "SiteUrl", "type": "Text" },
+      { "name": "ListName", "type": "Text" }
+    ],
+    "actions": [
+      {
+        "name": "Get_Items",
+        "action": "Send an HTTP request to SharePoint",
+        "site": "@{triggerBody()['text']}",
+        "method": "GET",
+        "uri": "/_api/web/lists/getbytitle('@{triggerBody()['text_1']}')/items?$top=5000&$select=Id,Title,OutlineLevel,ParentTaskId,SortOrder,PSP,PercentComplete,Priority,Status,Bucket,Start,EndDate,Duration,Start_Baseline,End_Baseline,Predecessor,AssignedTo,ADO_ID,ADO_State,ADO_WorkItemType,ADO_AreaPath,ADO_IterationPath,ADO_Responsible,ADO_BO_ID,Notes",
+        "headers": { "Accept": "application/json;odata=nometadata" }
+      },
+      {
+        "name": "Respond",
+        "action": "Respond to a PowerApp or flow",
+        "outputs": {
+          "TasksJSON": "@{body('Get_Items')['value']}"
+        }
+      }
+    ],
+    "powerAppUsage": "ClearCollect(colTasks, Table(ParseJSON(PMLoadProjectTasks.Run(varSiteUrl, varProjectListName).tasksjson)))"
+  },
+
+  "screens": {
+    "scrHome": {
+      "title": "Home / Project Selector",
+      "description": "Gallery of project cards from ProjectRegistry. Search, filter, create new projects.",
+      "layout": {
+        "header": { "height": 60, "content": "App title 'Project Management' + user avatar (Office365Users.MyProfile().DisplayName)" },
+        "toolbar": { "height": 50, "content": "Search input + Status dropdown + 'New Project' button" },
+        "body": { "content": "Scrollable Gallery of project cards (2 columns)" }
+      },
+      "controls": [
+        {
+          "name": "txtSearchProjects",
+          "type": "TextInput",
+          "properties": {
+            "HintText": "Search projects...",
+            "Width": 300,
+            "OnChange": ""
+          }
+        },
+        {
+          "name": "ddStatusFilter",
+          "type": "Dropdown",
+          "properties": {
+            "Items": "[\"All\", \"Active\", \"Not Started\", \"On Hold\", \"Completed\", \"Archived\"]",
+            "Default": "Active",
+            "Width": 150
+          }
+        },
+        {
+          "name": "btnNewProject",
+          "type": "Button",
+          "properties": {
+            "Text": "+ New Project",
+            "OnSelect": "Set(varShowNewProjectForm, true)",
+            "Fill": "RGBA(59, 130, 246, 1)",
+            "Color": "White"
+          }
+        },
+        {
+          "name": "galProjects",
+          "type": "Gallery (Vertical, 2 columns)",
+          "properties": {
+            "Items": "SortByColumns(Filter(ProjectRegistry, (ddStatusFilter.Selected.Value = \"All\" || ProjectStatus.Value = ddStatusFilter.Selected.Value) && (IsBlank(txtSearchProjects.Text) || txtSearchProjects.Text in Title)), \"Title\", SortOrder.Ascending)",
+            "TemplatePadding": 8,
+            "TemplateSize": 180,
+            "WrapCount": 2
+          },
+          "templateControls": [
+            { "name": "lblProjectName", "type": "Label", "Text": "ThisItem.Title", "FontWeight": "Bold", "Size": 14 },
+            { "name": "lblOwner", "type": "Label", "Text": "\"Owner: \" & If(!IsBlank(ThisItem.Owner), ThisItem.Owner.DisplayName, \"—\")", "Size": 11, "Color": "RGBA(100,116,139,1)" },
+            { "name": "lblStatus", "type": "HtmlText", "HtmlText": "\"<span style='padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#eff6ff;color:#2563eb'>\" & ThisItem.ProjectStatus.Value & \"</span>\"" },
+            { "name": "lblDates", "type": "Label", "Text": "Text(ThisItem.StartDate, \"[$-en-US]mmm d, yyyy\") & \" → \" & Text(ThisItem.EndDate, \"[$-en-US]mmm d, yyyy\")", "Size": 11 },
+            { "name": "lblTaskCount", "type": "Label", "Text": "\"Tasks: \" & ThisItem.TaskCount", "Size": 11 },
+            { "name": "btnOpen", "type": "Button", "Text": "Open", "OnSelect": "Set(varCurrentProject, ThisItem); Set(varProjectListName, ThisItem.ProjectListName); Set(varSiteUrl, \"https://basf.sharepoint.com/sites/ngba-gb-planner-projects\"); ClearCollect(colTasks, Table(ParseJSON(PMLoadProjectTasks.Run(varSiteUrl, varProjectListName).tasksjson))); ClearCollect(colBuckets, ParseJSON(ThisItem.BucketDefinitions)); Navigate(scrTaskList, ScreenTransition.None)" },
+            { "name": "btnSyncADO", "type": "Button", "Text": "Sync ADO", "OnSelect": "Notify(\"ADO sync flow not yet configured\", NotificationType.Information)", "Visible": "!IsBlank(ThisItem.ADO_QueryId)" }
+          ]
+        },
+        {
+          "name": "formNewProject",
+          "type": "Container (overlay)",
+          "visible": "varShowNewProjectForm",
+          "description": "Overlay form for creating a new project",
+          "controls": [
+            { "name": "txtNewProjectName", "type": "TextInput", "HintText": "Project Name *" },
+            { "name": "txtADOProject", "type": "TextInput", "HintText": "ADO Project (optional)" },
+            { "name": "txtADOAreaPath", "type": "TextInput", "HintText": "ADO Area Path (optional)" },
+            { "name": "txtADOIteration", "type": "TextInput", "HintText": "ADO Iteration (optional)" },
+            { "name": "dpStartDate", "type": "DatePicker", "DefaultDate": "Today()" },
+            { "name": "dpEndDate", "type": "DatePicker", "DefaultDate": "DateAdd(Today(), 90, TimeUnit.Days)" },
+            {
+              "name": "btnCreateProject",
+              "type": "Button",
+              "Text": "Create Project",
+              "OnSelect": "Set(varLoading, true); Set(varResult, PMCreateProjectList.Run(varSiteUrl, txtNewProjectName.Text, txtADOProject.Text, txtADOAreaPath.Text, txtADOIteration.Text, \"\", \"\", Text(dpStartDate.SelectedDate, \"yyyy-MM-dd\"), Text(dpEndDate.SelectedDate, \"yyyy-MM-dd\"), \"\")); If(varResult.status = \"Success\", Notify(\"Project created: \" & varResult.projectlistname, NotificationType.Success); Set(varShowNewProjectForm, false); Refresh(ProjectRegistry), Notify(\"Error: \" & varResult.status, NotificationType.Error)); Set(varLoading, false)"
+            },
+            { "name": "btnCancelCreate", "type": "Button", "Text": "Cancel", "OnSelect": "Set(varShowNewProjectForm, false)" }
+          ]
+        }
+      ]
+    },
+
+    "scrTaskList": {
+      "title": "Task List — Tree View",
+      "description": "ModernGrid PCF showing hierarchical task list with inline editing, selection, and add-task.",
+      "layout": {
+        "header": { "height": 50, "content": "Breadcrumb: Home > {ProjectName} > Tasks" },
+        "toolbar": { "height": 50, "content": "Indent/Outdent + Delete + Save Baseline + Refresh buttons" },
+        "body": { "content": "ModernGrid PCF (full width, fills remaining height)" }
+      },
+      "controls": [
+        {
+          "name": "lblBreadcrumb",
+          "type": "Label",
+          "properties": {
+            "Text": "\"🏠 Home  >  \" & varCurrentProject.Title & \"  >  Tasks\"",
+            "OnSelect": "Navigate(scrHome)",
+            "Size": 13
+          }
+        },
+        {
+          "name": "btnIndent",
+          "type": "Button",
+          "properties": {
+            "Text": "↗ Indent",
+            "OnSelect": "// For each selected task: increment OutlineLevel, set ParentTaskId to previous sibling\nForAll(ParseJSON(pcfModernGrid.selectedItems), Patch(/* dynamic list via flow */))",
+            "note": "Indent requires updating OutlineLevel +1 and setting ParentTaskId to the nearest sibling above"
+          }
+        },
+        {
+          "name": "btnOutdent",
+          "type": "Button",
+          "properties": {
+            "Text": "↙ Outdent",
+            "OnSelect": "// For each selected task: decrement OutlineLevel (min 1), update ParentTaskId"
+          }
+        },
+        {
+          "name": "btnDeleteSelected",
+          "type": "Button",
+          "properties": {
+            "Text": "🗑 Delete",
+            "OnSelect": "// Delete selected items via SP HTTP flow"
+          }
+        },
+        {
+          "name": "btnSaveBaseline",
+          "type": "Button",
+          "properties": {
+            "Text": "📌 Save Baseline",
+            "OnSelect": "// Copy Start → Start_Baseline, EndDate → End_Baseline for selected tasks"
+          }
+        },
+        {
+          "name": "btnRefresh",
+          "type": "Button",
+          "properties": {
+            "Text": "🔄 Refresh",
+            "OnSelect": "ClearCollect(colTasks, Table(ParseJSON(PMLoadProjectTasks.Run(varSiteUrl, varProjectListName).tasksjson)))"
+          }
+        },
+        {
+          "name": "pcfModernGrid",
+          "type": "PCF — MSDE.ModernTable (Code component)",
+          "properties": {
+            "Items": "colTasks",
+            "outlineLevelColumn": "\"OutlineLevel\"",
+            "parentIdColumn": "\"ParentTaskId\"",
+            "sortOrderColumn": "\"SortOrder\"",
+            "percentColumnName": "\"PercentComplete\"",
+            "resourceColumnName": "\"AssignedTo\"",
+            "enableResize": true,
+            "enableSort": false,
+            "enableFilter": true,
+            "enableSearch": true,
+            "enableSelection": true,
+            "enableInlineCreate": true,
+            "editableColumns": "\"Title,Status,PercentComplete,Priority,Bucket,Start,EndDate\"",
+            "tableHeight": "Parent.Height - 120",
+            "OnChange": "If(!IsBlank(Self.onCellChange), Set(varCellChange, ParseJSON(Self.onCellChange)); // Persist change to SP list via helper flow\n); If(!IsBlank(Self.onTaskCreate), Set(varNewTask, ParseJSON(Self.onTaskCreate)); // Create task in SP list via helper flow\n)"
+          }
+        }
+      ]
+    },
+
+    "scrGantt": {
+      "title": "Gantt Chart",
+      "description": "GanttChart PCF showing timeline visualization. Click bars for task detail panel.",
+      "layout": {
+        "header": { "height": 50, "content": "Breadcrumb + View mode + Baseline toggle" },
+        "body": { "content": "GanttChart PCF (full width)" },
+        "sidePanel": { "width": 350, "visible": "!IsBlank(varSelectedGanttTask)", "content": "Task detail form" }
+      },
+      "controls": [
+        {
+          "name": "ddViewMode",
+          "type": "Dropdown",
+          "properties": {
+            "Items": "[\"Day\", \"Week\", \"Month\"]",
+            "Default": "\"Week\"",
+            "OnChange": "Set(varGanttViewMode, Self.Selected.Value)"
+          }
+        },
+        {
+          "name": "tglBaseline",
+          "type": "Toggle",
+          "properties": {
+            "Default": false,
+            "OnCheck": "Set(varShowBaseline, true)",
+            "OnUncheck": "Set(varShowBaseline, false)",
+            "Label": "Show Baseline"
+          }
+        },
+        {
+          "name": "pcfGanttChart",
+          "type": "PCF — MSDE.GanttChart (Code component)",
+          "properties": {
+            "Items": "colTasks",
+            "taskTitleColumn": "\"Title\"",
+            "startDateColumn": "\"Start\"",
+            "endDateColumn": "\"EndDate\"",
+            "percentCompleteColumn": "\"PercentComplete\"",
+            "predecessorColumn": "\"Predecessor\"",
+            "statusColumn": "\"Status\"",
+            "outlineLevelColumn": "\"OutlineLevel\"",
+            "parentIdColumn": "\"ParentTaskId\"",
+            "sortOrderColumn": "\"SortOrder\"",
+            "defaultViewMode": "varGanttViewMode",
+            "chartHeight": "Parent.Height - 60",
+            "enableDragResize": true,
+            "baselineStartColumn": "If(varShowBaseline, \"Start_Baseline\", \"\")",
+            "baselineEndColumn": "If(varShowBaseline, \"End_Baseline\", \"\")",
+            "OnChange": "If(!IsBlank(Self.onDateChange), Set(varDateChange, ParseJSON(Self.onDateChange)); // Patch dates to SP list\n); If(!IsBlank(Self.onTaskClick), Set(varSelectedGanttTask, LookUp(colTasks, Value(Id) = Value(ParseJSON(Self.onTaskClick).id))))"
+          }
+        },
+        {
+          "name": "pnlTaskDetail",
+          "type": "Container (side panel)",
+          "visible": "!IsBlank(varSelectedGanttTask)",
+          "controls": [
+            { "name": "lblDetailTitle", "type": "Label", "Text": "varSelectedGanttTask.Title", "FontWeight": "Bold", "Size": 16 },
+            { "name": "lblDetailStatus", "type": "Label", "Text": "\"Status: \" & varSelectedGanttTask.Status" },
+            { "name": "lblDetailPriority", "type": "Label", "Text": "\"Priority: \" & varSelectedGanttTask.Priority" },
+            { "name": "lblDetailDates", "type": "Label", "Text": "\"Start: \" & Text(varSelectedGanttTask.Start, \"[$-en-US]mmm d\") & \"  End: \" & Text(varSelectedGanttTask.EndDate, \"[$-en-US]mmm d\")" },
+            { "name": "lblDetailProgress", "type": "Label", "Text": "\"Progress: \" & varSelectedGanttTask.PercentComplete & \"%\"" },
+            { "name": "lblDetailAssigned", "type": "Label", "Text": "\"Assigned: \" & varSelectedGanttTask.AssignedTo" },
+            { "name": "btnClosePanel", "type": "Button", "Text": "✕ Close", "OnSelect": "Set(varSelectedGanttTask, Blank())" }
+          ]
+        }
+      ]
+    },
+
+    "scrBoard": {
+      "title": "Board / Kanban",
+      "description": "Cards grouped by Bucket column. Native Power Apps — no PCF needed.",
+      "layout": {
+        "header": { "height": 50, "content": "Breadcrumb" },
+        "body": { "content": "Horizontal ScrollViewer with bucket columns" }
+      },
+      "controls": [
+        {
+          "name": "galBucketColumns",
+          "type": "Gallery (Horizontal)",
+          "properties": {
+            "Items": "colBuckets",
+            "TemplateSize": 280,
+            "TemplatePadding": 8
+          },
+          "templateControls": [
+            {
+              "name": "lblBucketHeader",
+              "type": "Label",
+              "properties": {
+                "Text": "ThisItem.Value & \" (\" & CountRows(Filter(colTasks, Bucket = ThisItem.Value)) & \")\"",
+                "FontWeight": "Bold",
+                "Size": 13
+              }
+            },
+            {
+              "name": "galBucketTasks",
+              "type": "Gallery (Vertical)",
+              "properties": {
+                "Items": "SortByColumns(Filter(colTasks, Bucket = galBucketColumns.Selected.Value), \"SortOrder\", SortOrder.Ascending)",
+                "TemplateSize": 120,
+                "TemplatePadding": 4
+              },
+              "templateControls": [
+                { "name": "lblCardTitle", "type": "Label", "Text": "ThisItem.Title", "FontWeight": "Semibold", "Size": 12 },
+                {
+                  "name": "lblCardPriority",
+                  "type": "HtmlText",
+                  "HtmlText": "\"<span style='padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:\" & Switch(ThisItem.Priority, \"Critical\", \"#fef2f2;color:#dc2626\", \"High\", \"#fffbeb;color:#d97706\", \"Medium\", \"#eff6ff;color:#2563eb\", \"#f0fdf4;color:#16a34a\") & \"'>\" & ThisItem.Priority & \"</span>\""
+                },
+                { "name": "lblCardAssigned", "type": "Label", "Text": "If(!IsBlank(ThisItem.AssignedTo), \"👤 \" & ThisItem.AssignedTo, \"Unassigned\")", "Size": 10, "Color": "RGBA(100,116,139,1)" },
+                {
+                  "name": "lblCardProgress",
+                  "type": "HtmlText",
+                  "HtmlText": "\"<div style='height:4px;background:#e2e8f0;border-radius:2px;margin-top:4px'><div style='height:100%;width:\" & ThisItem.PercentComplete & \"%;background:#3b82f6;border-radius:2px'></div></div><div style='font-size:10px;color:#64748b;margin-top:2px'>\" & ThisItem.PercentComplete & \"%</div>\""
+                },
+                {
+                  "name": "ddMoveTo",
+                  "type": "Dropdown",
+                  "properties": {
+                    "Items": "colBuckets",
+                    "Default": "LookUp(colBuckets, Value = ThisItem.Bucket)",
+                    "OnChange": "// Update Bucket on SP list item via helper flow\nNotify(\"Moved to \" & Self.Selected.Value)",
+                    "Width": 120,
+                    "Size": 10
+                  }
+                }
+              ]
+            },
+            {
+              "name": "btnAddToBucket",
+              "type": "Button",
+              "properties": {
+                "Text": "+ Add task",
+                "OnSelect": "// Quick create with Bucket = ThisItem.Value",
+                "Fill": "Transparent",
+                "BorderColor": "RGBA(203, 213, 225, 1)",
+                "BorderStyle": "Dashed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    "scrResources": {
+      "title": "Resource Assignment",
+      "description": "Left panel: team members. Right panel: ModernGrid filtered by selected person.",
+      "layout": {
+        "leftPanel": { "width": 280, "content": "Team member gallery" },
+        "rightPanel": { "content": "ModernGrid PCF filtered by person + bulk actions" }
+      },
+      "controls": [
+        {
+          "name": "galTeamMembers",
+          "type": "Gallery (Vertical)",
+          "properties": {
+            "Items": "AddColumns(Distinct(colTasks, AssignedTo), \"TaskCount\", CountRows(Filter(colTasks, AssignedTo = ThisRecord.Value)), \"AvgProgress\", Average(Filter(colTasks, AssignedTo = ThisRecord.Value), PercentComplete))",
+            "note": "Distinct people from colTasks + Unassigned entry"
+          },
+          "templateControls": [
+            { "name": "lblPersonName", "type": "Label", "Text": "If(IsBlank(ThisItem.Value), \"Unassigned\", ThisItem.Value)", "FontWeight": "Semibold" },
+            { "name": "lblPersonTasks", "type": "Label", "Text": "ThisItem.TaskCount & \" tasks\"", "Size": 11 },
+            {
+              "name": "lblPersonProgress",
+              "type": "HtmlText",
+              "HtmlText": "\"<div style='height:6px;background:#e2e8f0;border-radius:3px'><div style='height:100%;width:\" & ThisItem.AvgProgress & \"%;background:#3b82f6;border-radius:3px'></div></div>\""
+            },
+            { "name": "btnSelectPerson", "type": "Button (transparent)", "OnSelect": "Set(varSelectedPerson, ThisItem.Value)" }
+          ]
+        },
+        {
+          "name": "pcfResourceGrid",
+          "type": "PCF — MSDE.ModernTable",
+          "properties": {
+            "Items": "Filter(colTasks, If(IsBlank(varSelectedPerson), true, AssignedTo = varSelectedPerson))",
+            "enableSelection": true,
+            "enableSearch": true,
+            "enableFilter": true,
+            "editableColumns": "\"Status,PercentComplete,Priority\"",
+            "percentColumnName": "\"PercentComplete\"",
+            "tableHeight": "Parent.Height - 60"
+          }
+        },
+        {
+          "name": "btnBulkReassign",
+          "type": "Button",
+          "properties": {
+            "Text": "Reassign Selected →",
+            "OnSelect": "// Parse selectedItems, patch AssignedTo on each task"
+          }
+        },
+        {
+          "name": "btnCapacityView",
+          "type": "Button",
+          "properties": {
+            "Text": "📊 Capacity View",
+            "OnSelect": "Set(varShowCapacity, true)",
+            "note": "Opens ResourceCapacity data (Phase 5)"
+          }
+        }
+      ]
+    },
+
+    "scrDashboard": {
+      "title": "Dashboard",
+      "description": "KPI cards + charts for current project.",
+      "layout": {
+        "header": { "height": 50, "content": "Project name + date range" },
+        "kpiRow": { "height": 100, "content": "5 KPI cards" },
+        "chartsRow": { "height": 300, "content": "2 charts side by side" },
+        "milestonesRow": { "height": 200, "content": "Upcoming milestones gallery" }
+      },
+      "controls": [
+        {
+          "name": "lblProjectHeader",
+          "type": "Label",
+          "properties": {
+            "Text": "varCurrentProject.Title & \"  |  \" & Text(varCurrentProject.StartDate, \"[$-en-US]mmm d, yyyy\") & \" → \" & Text(varCurrentProject.EndDate, \"[$-en-US]mmm d, yyyy\")"
+          }
+        },
+        {
+          "name": "kpiCards",
+          "type": "5 Label containers in horizontal layout",
+          "cards": [
+            { "label": "TOTAL", "formula": "CountRows(colTasks)", "color": "#475569" },
+            { "label": "COMPLETED", "formula": "CountRows(Filter(colTasks, Status = \"Completed\"))", "color": "#16a34a" },
+            { "label": "IN PROGRESS", "formula": "CountRows(Filter(colTasks, Status = \"In Progress\"))", "color": "#3b82f6" },
+            { "label": "BLOCKED", "formula": "CountRows(Filter(colTasks, Status = \"Blocked\"))", "color": "#dc2626" },
+            { "label": "OVERDUE", "formula": "CountRows(Filter(colTasks, EndDate < Today() && Status <> \"Completed\" && Status <> \"Cancelled\"))", "color": "#f59e0b" }
+          ]
+        },
+        {
+          "name": "chartByStatus",
+          "type": "PieChart",
+          "properties": {
+            "Items": "GroupBy(colTasks, \"Status\", \"GroupedTasks\")",
+            "Labels": "Status",
+            "Values": "CountRows(GroupedTasks)",
+            "note": "Power Apps native PieChart control"
+          }
+        },
+        {
+          "name": "chartByPriority",
+          "type": "BarChart",
+          "properties": {
+            "Items": "GroupBy(colTasks, \"Priority\", \"GroupedTasks\")",
+            "Labels": "Priority",
+            "Values": "CountRows(GroupedTasks)"
+          }
+        },
+        {
+          "name": "galMilestones",
+          "type": "Gallery (Vertical)",
+          "properties": {
+            "Items": "SortByColumns(Filter(colTasks, EndDate >= Today() && EndDate <= DateAdd(Today(), 7, TimeUnit.Days) && Status <> \"Completed\"), \"EndDate\", SortOrder.Ascending)",
+            "note": "Tasks due this week"
+          },
+          "templateControls": [
+            { "name": "lblMilestoneTitle", "type": "Label", "Text": "ThisItem.Title", "FontWeight": "Semibold" },
+            { "name": "lblMilestoneDue", "type": "Label", "Text": "\"Due: \" & Text(ThisItem.EndDate, \"[$-en-US]mmm d\")", "Size": 11 },
+            { "name": "lblMilestoneAssigned", "type": "Label", "Text": "\"👤 \" & ThisItem.AssignedTo", "Size": 11 },
+            { "name": "lblMilestoneProgress", "type": "Label", "Text": "ThisItem.PercentComplete & \"%\"", "Size": 11 },
+            { "name": "icoOverdue", "type": "Icon", "Icon": "Warning", "Visible": "ThisItem.EndDate < Today()", "Color": "RGBA(245, 158, 11, 1)" }
+          ]
+        }
+      ]
+    }
+  },
+
+  "helperFlows_needed": [
+    {
+      "name": "PM-LoadProjectTasks",
+      "purpose": "Read all items from a named SP list (dynamic list binding workaround)",
+      "defined_above": true
+    },
+    {
+      "name": "PM-UpdateTask",
+      "purpose": "Update a single SP list item (receives SiteUrl, ListName, ItemId, FieldName, Value)",
+      "trigger": "PowerApps (V2)",
+      "actions": [
+        {
+          "action": "Send an HTTP request to SharePoint",
+          "method": "PATCH",
+          "uri": "/_api/web/lists/getbytitle('@{triggerBody()['text_1']}')/items(@{triggerBody()['number']})",
+          "headers": { "Accept": "application/json;odata=nometadata", "Content-Type": "application/json;odata=nometadata", "IF-MATCH": "*", "X-HTTP-Method": "MERGE" },
+          "body": "json(concat('{\"', triggerBody()['text_2'], '\":\"', triggerBody()['text_3'], '\"}'))"
+        }
+      ]
+    },
+    {
+      "name": "PM-CreateTask",
+      "purpose": "Create a new task in a named SP list",
+      "trigger": "PowerApps (V2)",
+      "inputs": ["SiteUrl", "ListName", "Title", "OutlineLevel", "ParentTaskId", "Bucket"],
+      "actions": [
+        {
+          "action": "Send an HTTP request to SharePoint",
+          "method": "POST",
+          "uri": "/_api/web/lists/getbytitle('@{triggerBody()['text_1']}')/items",
+          "body": {
+            "Title": "@{triggerBody()['text_2']}",
+            "OutlineLevel": "@{triggerBody()['number']}",
+            "ParentTaskId": "@{triggerBody()['number_1']}",
+            "Bucket": "@{triggerBody()['text_3']}",
+            "SortOrder": 0,
+            "PercentComplete": 0,
+            "Status": "Not Started",
+            "Priority": "Medium"
+          }
+        }
+      ]
+    },
+    {
+      "name": "PM-DeleteTasks",
+      "purpose": "Delete multiple SP list items by ID array",
+      "trigger": "PowerApps (V2)",
+      "inputs": ["SiteUrl", "ListName", "ItemIdsJSON"],
+      "actions": [
+        {
+          "note": "Parse ItemIdsJSON, Apply_to_each, DELETE via SP HTTP"
+        }
+      ]
+    }
+  ]
+}
