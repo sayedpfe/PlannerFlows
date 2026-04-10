@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="MSDE" constructor="GanttChart" version="1.0.0"
+    display-name-key="Gantt Chart v1.0"
+    description-key="Interactive Gantt chart with drag-resize, dependencies, view mode toggle, and baseline display. Wraps frappe-gantt."
+    control-type="standard" >
+
+    <external-service-usage enabled="false">
+    </external-service-usage>
+
+    <!-- Primary data set -->
+    <data-set name="dataSet" display-name-key="Task Data Source"
+      description-key="The data source containing tasks (SharePoint list, Dataverse table, or collection)">
+    </data-set>
+
+    <!-- Column mappings (input) -->
+    <property name="taskTitleColumn" display-name-key="Task Title Column"
+      description-key="Column name containing the task title (e.g. Title)"
+      of-type="SingleLine.Text" usage="input" required="true" />
+    <property name="startDateColumn" display-name-key="Start Date Column"
+      description-key="Column name containing the start date (e.g. Start)"
+      of-type="SingleLine.Text" usage="input" required="true" />
+    <property name="endDateColumn" display-name-key="End Date Column"
+      description-key="Column name containing the end date (e.g. EndDate)"
+      of-type="SingleLine.Text" usage="input" required="true" />
+    <property name="percentCompleteColumn" display-name-key="Percent Complete Column"
+      description-key="Column name for progress percentage (e.g. PercentComplete)."
+      of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="predecessorColumn" display-name-key="Predecessor Column"
+      description-key="Column name for dependencies (e.g. Predecessor). Format: comma-separated IDs."
+      of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="statusColumn" display-name-key="Status Column"
+      description-key="Column name for status, used for bar color coding (e.g. Status)."
+      of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="outlineLevelColumn" display-name-key="Outline Level Column"
+      description-key="Column for WBS depth (e.g. OutlineLevel). Used to indent task labels."
+      of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="parentIdColumn" display-name-key="Parent ID Column"
+      description-key="Column for parent task ID (e.g. ParentTaskId). For summary bar rollup."
+      of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="sortOrderColumn" display-name-key="Sort Order Column"
+      description-key="Column for display order within siblings (e.g. SortOrder)."
+      of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- View configuration -->
+    <property name="defaultViewMode" display-name-key="Default View Mode"
+      description-key="Initial timeline scale: Day, Week, Month, or Quarter."
+      of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="chartHeight" display-name-key="Chart Height"
+      description-key="Height of the chart in pixels (0 = auto)."
+      of-type="Whole.None" usage="input" required="false" default-value="500" />
+    <property name="enableDragResize" display-name-key="Enable Drag Resize"
+      description-key="Allow users to drag bar edges to change dates."
+      of-type="TwoOptions" usage="input" required="false" default-value="true" />
+
+    <!-- Baseline (optional) -->
+    <property name="baselineStartColumn" display-name-key="Baseline Start Column"
+      description-key="Column for baseline start date. Leave empty to hide baseline."
+      of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="baselineEndColumn" display-name-key="Baseline End Column"
+      description-key="Column for baseline end date."
+      of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- Output events -->
+    <property name="onDateChange" display-name-key="On Date Change"
+      description-key="Fires when a bar is dragged. JSON: {id, start, end}"
+      of-type="SingleLine.Text" usage="output" />
+    <property name="onProgressChange" display-name-key="On Progress Change"
+      description-key="Fires when progress handle is dragged. JSON: {id, progress}"
+      of-type="SingleLine.Text" usage="output" />
+    <property name="onTaskClick" display-name-key="On Task Click"
+      description-key="Fires when a bar is clicked. JSON: {id, title}"
+      of-type="SingleLine.Text" usage="output" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <css path="css/GanttChart.css" order="1" />
+    </resources>
+  </control>
+</manifest>
