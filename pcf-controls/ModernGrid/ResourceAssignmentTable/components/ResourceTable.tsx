@@ -19,7 +19,7 @@ import { TreeChevron } from "./TreeChevron";
 
 export type { IRow, IResource };
 
-export interface IModernTableProps {
+export interface IProjectGridProps {
   rows: IRow[];
   columns: IColumnDef[];
   resources: IResource[];
@@ -58,7 +58,7 @@ export interface IModernTableProps {
  * - Global search across all column values
  * - Optional multi-select resource assignment with searchable dropdown
  */
-export const ModernTable: React.FC<IModernTableProps> = ({
+export const ProjectGrid: React.FC<IProjectGridProps> = ({
   rows,
   columns,
   resources,

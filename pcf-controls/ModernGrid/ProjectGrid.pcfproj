@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(PowerAppsTargetsPath)" Condition="Exists('$(PowerAppsTargetsPath)')"/>
   <PropertyGroup>
-    <Name>ModernTable</Name>
+    <Name>ProjectGrid</Name>
     <ProjectGuid>a1b2c3d4-e5f6-7890-abcd-ef1234567890</ProjectGuid>
     <OutputPath>$(MSBuildThisFileDirectory)out\controls</OutputPath>
   </PropertyGroup>

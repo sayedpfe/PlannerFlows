@@ -1,6 +1,6 @@
 import { IInputs, IOutputs } from "./generated/ManifestTypes";
 import * as React from "react";
-import { ModernTable as ModernTableComponent, IModernTableProps } from "./components/ResourceTable";
+import { ProjectGrid as ProjectGridComponent, IProjectGridProps } from "./components/ResourceTable";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import {
   IRow,
@@ -13,7 +13,7 @@ import {
   getMinWidth,
 } from "./utils/types";
 
-export class ModernTable implements ComponentFramework.ReactControl<IInputs, IOutputs> {
+export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOutputs> {
   private notifyOutputChanged!: () => void;
   private lastChangePayload: string = "";
   private lastPeopleSearchQuery: string = "";
@@ -78,7 +78,7 @@ export class ModernTable implements ComponentFramework.ReactControl<IInputs, IOu
           .filter((s: string) => s.length > 0)
       );
 
-      const props: IModernTableProps = {
+      const props: IProjectGridProps = {
         rows,
         columns,
         resources,
@@ -114,10 +114,10 @@ export class ModernTable implements ComponentFramework.ReactControl<IInputs, IOu
       };
 
       return React.createElement(ErrorBoundary, null,
-        React.createElement(ModernTableComponent, props)
+        React.createElement(ProjectGridComponent, props)
       );
     } catch (error) {
-      console.error("[ModernTable] Error in updateView:", error);
+      console.error("[ProjectGrid] Error in updateView:", error);
       // Return a safe error display instead of crashing
       return React.createElement("div", {
         style: {

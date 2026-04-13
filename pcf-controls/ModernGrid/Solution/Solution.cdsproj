@@ -46,7 +46,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\ModernTable.pcfproj" />
+    <ProjectReference Include="..\ProjectGrid.pcfproj" />
     <ProjectReference Include="..\..\GanttChart\GanttChart.pcfproj" />
   </ItemGroup>
 

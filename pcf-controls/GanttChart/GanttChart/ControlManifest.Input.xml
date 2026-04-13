@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="MSDE" constructor="GanttChart" version="1.0.0"
+  <control namespace="PMGrid" constructor="GanttChart" version="1.0.0"
     display-name-key="Gantt Chart v1.0"
     description-key="Interactive Gantt chart with drag-resize, dependencies, view mode toggle, and baseline display. Wraps frappe-gantt."
     control-type="standard" >

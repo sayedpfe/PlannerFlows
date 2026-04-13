@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="MSDE" constructor="ModernTable" version="4.0.0" display-name-key="ModernTable v4.0" description-key="A generic modern table component with tree/hierarchy view, resizable columns, sorting, filtering, per-column inline editing, progress bars, row selection, and optional resource assignment. Works with any data source." control-type="virtual" >
+  <control namespace="PMGrid" constructor="ProjectGrid" version="1.0.0" display-name-key="Project Grid v1.0" description-key="Interactive project grid with tree/hierarchy view, resizable columns, sorting, filtering, per-column inline editing, progress bars, row selection, and optional resource assignment. Works with any data source." control-type="virtual" >
 
     <!-- Primary data set: binds to any SharePoint list or Dataverse table -->
     <data-set name="dataSet" display-name-key="Data Source" description-key="The data source to display (SharePoint list, Dataverse table, or collection)">
@@ -40,7 +40,7 @@
       <code path="index.ts" order="1" />
       <platform-library name="React" version="16.8.6" />
       <platform-library name="Fluent" version="9.46.2" />
-      <css path="css/ModernTable.css" order="1" />
+      <css path="css/ProjectGrid.css" order="1" />
     </resources>
   </control>
 </manifest>

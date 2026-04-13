@@ -2,34 +2,34 @@
 <ImportExportXml version="9.1.0.643" SolutionPackageVersion="9.1" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SolutionManifest>
     <!-- Unique Name of Cds Solution-->
-    <UniqueName>ProjectMgmt</UniqueName>
+    <UniqueName>PMSolution</UniqueName>
     <LocalizedNames>
       <!-- Localized Solution Name in language code -->
       <LocalizedName description="Project Management" languagecode="1033" />
     </LocalizedNames>
     <Descriptions>
-      <Description description="Project Management PCF controls: ModernTable v4.0 (tree/hierarchy grid) and GanttChart v1.0" languagecode="1033" />
+      <Description description="Project Management PCF controls: ProjectGrid v1.0 (tree/hierarchy grid) and GanttChart v1.0" languagecode="1033" />
     </Descriptions>
-    <Version>4.0.0</Version>
+    <Version>1.0.0</Version>
     <!-- Solution Package Type: Unmanaged(0)/Managed(1)/Both(2)-->
     <Managed>0</Managed>
     <Publisher>
       <!-- Unique Publisher Name of Cds Solution -->
-      <UniqueName>MSDEPublisher</UniqueName>
+      <UniqueName>PMPublisher</UniqueName>
       <LocalizedNames>
         <!-- Localized Cds Publisher Name in language code-->
-        <LocalizedName description="MSDEPublisher" languagecode="1033" />
+        <LocalizedName description="PM Publisher" languagecode="1033" />
       </LocalizedNames>
       <Descriptions>
         <!-- Description of Cds Publisher in language code -->
-        <Description description="MSDEPublisher" languagecode="1033" />
+        <Description description="PM Publisher" languagecode="1033" />
       </Descriptions>
       <EMailAddress xsi:nil="true"></EMailAddress>
       <SupportingWebsiteUrl xsi:nil="true"></SupportingWebsiteUrl>
       <!-- Customization Prefix for the Cds Publisher-->
-      <CustomizationPrefix>msde</CustomizationPrefix>
+      <CustomizationPrefix>pm</CustomizationPrefix>
       <!-- Derived Option Value Prefix for the Customization Prefix of Cds Publisher -->
-      <CustomizationOptionValuePrefix>21841</CustomizationOptionValuePrefix>
+      <CustomizationOptionValuePrefix>44100</CustomizationOptionValuePrefix>
       <Addresses>
         <!-- Address of the Publisher-->
         <Address>
