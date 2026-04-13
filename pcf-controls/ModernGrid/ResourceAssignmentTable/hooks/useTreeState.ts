@@ -67,20 +67,15 @@ export function useTreeState(storageKey: string) {
     [persist]
   );
 
-  // Expanded set is the inverse: a node is expanded if NOT in collapsedIds
-  const expandedIds = useMemo(() => {
-    return {
-      has: (id: string) => !collapsedIds.has(id),
-    } as Set<string>;
-  }, [collapsedIds]);
-
+  // Collapsed IDs — a node is expanded if NOT in this set
+  // We expose collapsedIds directly instead of a fake inverted Set
   const isExpanded = useCallback(
     (rowId: string) => !collapsedIds.has(rowId),
     [collapsedIds]
   );
 
   return {
-    expandedIds,
+    collapsedIds,
     toggleExpand,
     expandAll,
     collapseAll,

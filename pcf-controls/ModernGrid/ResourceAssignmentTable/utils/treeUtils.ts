@@ -79,32 +79,29 @@ export function buildTreeOrder(
 }
 
 /**
- * Filter tree nodes to only show visible rows based on expanded state.
+ * Filter tree nodes to only show visible rows based on collapsed state.
  * Children of collapsed parents are hidden.
+ * @param collapsedIds - Set of row IDs that are collapsed (children hidden)
  */
 export function filterVisibleRows(
   treeNodes: ITreeNode[],
-  expandedSet: Set<string>
+  collapsedIds: Set<string>
 ): ITreeNode[] {
   const result: ITreeNode[] = [];
-  // Track collapsed ancestor depth — if we encounter a collapsed parent,
-  // skip all children until we return to a depth <= the collapsed parent's depth
   let collapsedAtDepth: number | null = null;
 
   for (const node of treeNodes) {
-    // If we're inside a collapsed subtree, check if we've exited it
     if (collapsedAtDepth !== null) {
       if (node.depth > collapsedAtDepth) {
-        continue; // Still inside collapsed subtree — skip
+        continue;
       }
-      // Exited the collapsed subtree
       collapsedAtDepth = null;
     }
 
     result.push(node);
 
-    // If this node has children and is collapsed, begin skipping
-    if (node.hasChildren && !expandedSet.has(node.row.id)) {
+    // If this node has children and IS in collapsedIds, begin skipping
+    if (node.hasChildren && collapsedIds.has(node.row.id)) {
       collapsedAtDepth = node.depth;
     }
   }

@@ -132,12 +132,12 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
 
   // Tree state (expand/collapse)
   const {
-    expandedIds,
+    collapsedIds,
     toggleExpand,
     expandAll,
     collapseAll,
     isExpanded,
-  } = useTreeState("moderntable");
+  } = useTreeState("projectgrid");
 
   // Process rows: search -> filter -> tree order (or sort) -> render
   const processedData = React.useMemo(() => {
@@ -146,16 +146,14 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
     result = applyFilters(result, filters, resources, resourceColumnKey);
 
     if (isTreeMode) {
-      // Tree mode: build tree order then filter by expand/collapse state
       const treeNodes = buildTreeOrder(result, outlineLevelKey!, parentIdKey!, sortOrderKey!);
-      const visibleNodes = filterVisibleRows(treeNodes, expandedIds);
+      const visibleNodes = filterVisibleRows(treeNodes, collapsedIds);
       return { rows: visibleNodes.map((n) => n.row), treeNodes: visibleNodes };
     }
 
-    // Flat mode: apply normal sorting
     result = applySorting(result, sort, enrichedColumns);
     return { rows: result, treeNodes: null as ITreeNode[] | null };
-  }, [rows, searchText, filters, sort, resources, enrichedColumns, resourceColumnKey, isTreeMode, outlineLevelKey, parentIdKey, sortOrderKey, expandedIds]);
+  }, [rows, searchText, filters, sort, resources, enrichedColumns, resourceColumnKey, isTreeMode, outlineLevelKey, parentIdKey, sortOrderKey, collapsedIds]);
 
   const processedRows = processedData.rows;
   const treeNodes = processedData.treeNodes;

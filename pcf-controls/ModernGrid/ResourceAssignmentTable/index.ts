@@ -48,12 +48,12 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
     try {
       const dataset = context.parameters.dataSet;
       const resourceColumnName = context.parameters.resourceColumnName?.raw || "";
-      const percentColumnName = (context.parameters as any).percentColumnName?.raw || "";
-      const outlineLevelColumn = (context.parameters as any).outlineLevelColumn?.raw || "";
-      const parentIdColumn = (context.parameters as any).parentIdColumn?.raw || "";
-      const sortOrderColumn = (context.parameters as any).sortOrderColumn?.raw || "";
-      const enableSelection = (context.parameters as any).enableSelection?.raw ?? false;
-      const enableInlineCreate = (context.parameters as any).enableInlineCreate?.raw ?? false;
+      const percentColumnName = context.parameters.percentColumnName?.raw || "";
+      const outlineLevelColumn = context.parameters.outlineLevelColumn?.raw || "";
+      const parentIdColumn = context.parameters.parentIdColumn?.raw || "";
+      const sortOrderColumn = context.parameters.sortOrderColumn?.raw || "";
+      const enableSelection = context.parameters.enableSelection?.raw ?? false;
+      const enableInlineCreate = context.parameters.enableInlineCreate?.raw ?? false;
 
       const columns = this.buildColumnDefs(dataset, resourceColumnName, percentColumnName);
       const rows = this.mapDatasetToRows(dataset, columns, resourceColumnName);
@@ -70,7 +70,7 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
       }
 
       // Parse comma-separated editable column names into a Set
-      const editableColumnsRaw = (context.parameters as any).editableColumns?.raw || "";
+      const editableColumnsRaw = context.parameters.editableColumns?.raw || "";
       const editableColumnKeys = new Set<string>(
         editableColumnsRaw
           .split(",")
