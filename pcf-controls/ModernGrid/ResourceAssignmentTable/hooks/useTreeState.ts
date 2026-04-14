@@ -1,36 +1,57 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
+
+/**
+ * Safe localStorage access — Canvas Apps sandbox may block localStorage.
+ */
+function getStorage(): Storage | null {
+  try {
+    if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+      window.localStorage.setItem("__pcf_test__", "1");
+      window.localStorage.removeItem("__pcf_test__");
+      return window.localStorage;
+    }
+  } catch {
+    // Sandboxed
+  }
+  return null;
+}
 
 const STORAGE_PREFIX = "pcf_tree_state_";
 
 /**
  * Hook to manage tree expand/collapse state.
- * Persists collapsed IDs to localStorage.
+ * Persists collapsed IDs to localStorage when available.
  * Default: all nodes expanded (collapsed set is empty).
  */
 export function useTreeState(storageKey: string) {
-  // Load collapsed IDs from localStorage on init
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_PREFIX + storageKey);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return new Set<string>(parsed);
+    const storage = getStorage();
+    if (storage) {
+      try {
+        const stored = storage.getItem(STORAGE_PREFIX + storageKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) return new Set<string>(parsed);
+        }
+      } catch {
+        // Ignore
       }
-    } catch {
-      // Ignore storage errors
     }
     return new Set<string>();
   });
 
   const persist = useCallback(
     (newSet: Set<string>) => {
-      try {
-        localStorage.setItem(
-          STORAGE_PREFIX + storageKey,
-          JSON.stringify(Array.from(newSet))
-        );
-      } catch {
-        // Ignore storage errors
+      const storage = getStorage();
+      if (storage) {
+        try {
+          storage.setItem(
+            STORAGE_PREFIX + storageKey,
+            JSON.stringify(Array.from(newSet))
+          );
+        } catch {
+          // Ignore
+        }
       }
     },
     [storageKey]

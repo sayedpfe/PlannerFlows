@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="PMGrid" constructor="ProjectGrid" version="1.0.1" display-name-key="Project Grid v1.0" description-key="Interactive project grid with tree/hierarchy view, resizable columns, sorting, filtering, per-column inline editing, progress bars, row selection, and optional resource assignment. Works with any data source." control-type="virtual" >
+  <control namespace="PMGrid" constructor="ProjectGrid" version="1.0.2" display-name-key="Project Grid v1.0" description-key="Interactive project grid with tree/hierarchy view, resizable columns, sorting, filtering, per-column inline editing, progress bars, row selection, and optional resource assignment. Works with any data source." control-type="virtual" >
 
     <!-- Primary data set: binds to any SharePoint list or Dataverse table -->
     <data-set name="dataSet" display-name-key="Data Source" description-key="The data source to display (SharePoint list, Dataverse table, or collection)">
