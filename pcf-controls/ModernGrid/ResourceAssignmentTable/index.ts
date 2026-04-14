@@ -45,6 +45,14 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
   public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
     this.context = context;
 
+    // Request max page size on first load
+    const dataset = context.parameters.dataSet;
+    if (dataset.paging) {
+      if (dataset.paging.pageSize !== 5000) {
+        dataset.paging.setPageSize(5000);
+      }
+    }
+
     try {
       const dataset = context.parameters.dataSet;
       const resourceColumnName = context.parameters.resourceColumnName?.raw || "";
@@ -98,6 +106,9 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
         onSelectionChange: enableSelection ? this.boundHandleSelectionChange : undefined,
         enableInlineCreate,
         onTaskCreate: enableInlineCreate ? this.boundHandleTaskCreate : undefined,
+        hasNextPage: dataset.paging?.hasNextPage ?? false,
+        loadNextPage: () => { if (dataset.paging?.hasNextPage) dataset.paging.loadNextPage(); },
+        totalRecordCount: dataset.paging?.totalResultCount ?? rows.length,
         onResourceChange: resourceColumnName
           ? this.boundHandleResourceChange
           : undefined,

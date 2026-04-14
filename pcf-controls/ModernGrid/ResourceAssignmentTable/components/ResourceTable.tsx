@@ -34,6 +34,9 @@ export interface IModernTableProps {
   onSelectionChange?: (selectedIds: string[]) => void;
   enableInlineCreate?: boolean;
   onTaskCreate?: (payload: { parentId: string | null; title: string; outlineLevel: number }) => void;
+  hasNextPage?: boolean;
+  loadNextPage?: () => void;
+  totalRecordCount?: number;
   onResourceChange?: (rowId: string, resourceIds: string[]) => void;
   onCellChange?: (rowId: string, columnKey: string, newValue: string) => void;
   onPeopleSearchChange?: (query: string) => void;
@@ -58,6 +61,9 @@ export const ModernTable: React.FC<IModernTableProps> = ({
   onSelectionChange,
   enableInlineCreate,
   onTaskCreate,
+  hasNextPage,
+  loadNextPage,
+  totalRecordCount,
   onResourceChange,
   onCellChange,
   onPeopleSearchChange,
@@ -483,7 +489,7 @@ export const ModernTable: React.FC<IModernTableProps> = ({
               whiteSpace: "nowrap",
             }}
           >
-            {processedRows.length} / {rows.length} records
+            {processedRows.length} / {totalRecordCount ?? rows.length} records
           </div>
 
           {/* Tree expand/collapse buttons */}
@@ -648,6 +654,30 @@ export const ModernTable: React.FC<IModernTableProps> = ({
           </tbody>
         </table>
       </div>
+
+      {/* Load more footer */}
+      {hasNextPage && loadNextPage && (
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px", borderTop: "1px solid #f1f5f9" }}>
+          <button
+            onClick={loadNextPage}
+            style={{
+              padding: "8px 24px",
+              border: "1.5px solid #3b82f6",
+              borderRadius: 8,
+              background: "#eff6ff",
+              color: "#2563eb",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#dbeafe")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#eff6ff")}
+          >
+            Load more records ({rows.length} of {totalRecordCount ?? "..."})
+          </button>
+        </div>
+      )}
     </div>
   );
 };
