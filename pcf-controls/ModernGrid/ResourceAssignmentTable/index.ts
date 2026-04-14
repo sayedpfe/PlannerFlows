@@ -1,6 +1,6 @@
 import { IInputs, IOutputs } from "./generated/ManifestTypes";
 import * as React from "react";
-import { ProjectGrid as ProjectGridComponent, IProjectGridProps } from "./components/ResourceTable";
+import { ModernTable as ModernTableComponent, IModernTableProps } from "./components/ResourceTable";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import {
   IRow,
@@ -48,12 +48,12 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
     try {
       const dataset = context.parameters.dataSet;
       const resourceColumnName = context.parameters.resourceColumnName?.raw || "";
-      const percentColumnName = context.parameters.percentColumnName?.raw || "";
-      const outlineLevelColumn = context.parameters.outlineLevelColumn?.raw || "";
-      const parentIdColumn = context.parameters.parentIdColumn?.raw || "";
-      const sortOrderColumn = context.parameters.sortOrderColumn?.raw || "";
-      const enableSelection = context.parameters.enableSelection?.raw ?? false;
-      const enableInlineCreate = context.parameters.enableInlineCreate?.raw ?? false;
+      const percentColumnName = (context.parameters as any).percentColumnName?.raw || "";
+      const outlineLevelColumn = (context.parameters as any).outlineLevelColumn?.raw || "";
+      const parentIdColumn = (context.parameters as any).parentIdColumn?.raw || "";
+      const sortOrderColumn = (context.parameters as any).sortOrderColumn?.raw || "";
+      const enableSelection = (context.parameters as any).enableSelection?.raw ?? false;
+      const enableInlineCreate = (context.parameters as any).enableInlineCreate?.raw ?? false;
 
       const columns = this.buildColumnDefs(dataset, resourceColumnName, percentColumnName);
       const rows = this.mapDatasetToRows(dataset, columns, resourceColumnName);
@@ -70,7 +70,7 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
       }
 
       // Parse comma-separated editable column names into a Set
-      const editableColumnsRaw = context.parameters.editableColumns?.raw || "";
+      const editableColumnsRaw = (context.parameters as any).editableColumns?.raw || "";
       const editableColumnKeys = new Set<string>(
         editableColumnsRaw
           .split(",")
@@ -78,7 +78,7 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
           .filter((s: string) => s.length > 0)
       );
 
-      const props: IProjectGridProps = {
+      const props: IModernTableProps = {
         rows,
         columns,
         resources,
@@ -91,14 +91,11 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
         enableSearch: context.parameters.enableSearch?.raw ?? true,
         editableColumnKeys,
         tableHeight: context.parameters.tableHeight?.raw ?? 0,
-        // Tree/hierarchy props
         outlineLevelKey: outlineLevelColumn || undefined,
         parentIdKey: parentIdColumn || undefined,
         sortOrderKey: sortOrderColumn || undefined,
-        // Selection
         enableSelection,
         onSelectionChange: enableSelection ? this.boundHandleSelectionChange : undefined,
-        // Inline create
         enableInlineCreate,
         onTaskCreate: enableInlineCreate ? this.boundHandleTaskCreate : undefined,
         onResourceChange: resourceColumnName
@@ -114,10 +111,10 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
       };
 
       return React.createElement(ErrorBoundary, null,
-        React.createElement(ProjectGridComponent, props)
+        React.createElement(ModernTableComponent, props)
       );
     } catch (error) {
-      console.error("[ProjectGrid] Error in updateView:", error);
+      console.error("[ModernTable] Error in updateView:", error);
       // Return a safe error display instead of crashing
       return React.createElement("div", {
         style: {
@@ -159,7 +156,7 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
           (col.name === resourceColumnName || col.alias === resourceColumnName);
 
         const isPercentCol =
-          percentColumnName !== "" && percentColumnName != null &&
+          !!percentColumnName &&
           (col.name === percentColumnName || col.alias === percentColumnName);
 
         const cellType = mapDataTypeToCellType(col.dataType, isResourceCol, isPercentCol);
@@ -652,17 +649,11 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
     } as IOutputs;
   }
 
-  /**
-   * Called when row selection changes.
-   */
   private handleSelectionChange(selectedIds: string[]): void {
     this.lastSelectedItems = JSON.stringify(selectedIds);
     this.notifyOutputChanged();
   }
 
-  /**
-   * Called when user creates a task via inline add row.
-   */
   private handleTaskCreate(payload: { parentId: string | null; title: string; outlineLevel: number }): void {
     this.lastTaskCreatePayload = JSON.stringify({
       ...payload,

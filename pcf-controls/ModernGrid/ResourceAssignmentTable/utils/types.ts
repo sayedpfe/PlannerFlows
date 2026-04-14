@@ -194,13 +194,3 @@ export function getPercentColor(value: number): string {
   if (value >= 34) return "#f59e0b";
   return "#ef4444";
 }
-
-/**
- * Represents a node in the tree view with depth and child info.
- */
-export interface ITreeNode {
-  row: IRow;
-  depth: number;
-  hasChildren: boolean;
-  parentId: string | null;
-}

@@ -8,9 +8,9 @@
       <LocalizedName description="Project Management" languagecode="1033" />
     </LocalizedNames>
     <Descriptions>
-      <Description description="Project Management PCF controls: ProjectGrid v1.0 (tree/hierarchy grid) and GanttChart v1.0" languagecode="1033" />
+      <Description description="Project Management PCF controls: ProjectGrid + GanttChart" languagecode="1033" />
     </Descriptions>
-    <Version>1.0.2</Version>
+    <Version>1.3.0</Version>
     <!-- Solution Package Type: Unmanaged(0)/Managed(1)/Both(2)-->
     <Managed>0</Managed>
     <Publisher>

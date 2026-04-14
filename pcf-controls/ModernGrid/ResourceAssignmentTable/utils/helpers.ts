@@ -153,33 +153,13 @@ export function applySorting(
 }
 
 /**
- * Safe localStorage access — Canvas Apps sandbox may block localStorage entirely.
- */
-function getStorage(): Storage | null {
-  try {
-    if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
-      // Test with a dummy write to verify it's actually accessible
-      window.localStorage.setItem("__pcf_test__", "1");
-      window.localStorage.removeItem("__pcf_test__");
-      return window.localStorage;
-    }
-  } catch {
-    // Sandboxed — localStorage blocked
-  }
-  return null;
-}
-
-/**
  * Persist column widths to localStorage
  */
 export function saveColumnWidths(widths: Record<string, number>): void {
-  const storage = getStorage();
-  if (storage) {
-    try {
-      storage.setItem("pcf_project_grid_col_widths", JSON.stringify(widths));
-    } catch {
-      // Ignore
-    }
+  try {
+    localStorage.setItem("pcf_modern_table_col_widths", JSON.stringify(widths));
+  } catch {
+    // localStorage not available
   }
 }
 
@@ -187,10 +167,8 @@ export function saveColumnWidths(widths: Record<string, number>): void {
  * Load column widths from localStorage
  */
 export function loadColumnWidths(): Record<string, number> | null {
-  const storage = getStorage();
-  if (!storage) return null;
   try {
-    const stored = storage.getItem("pcf_project_grid_col_widths");
+    const stored = localStorage.getItem("pcf_modern_table_col_widths");
     return stored ? JSON.parse(stored) : null;
   } catch {
     return null;

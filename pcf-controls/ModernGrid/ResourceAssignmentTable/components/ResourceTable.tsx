@@ -3,23 +3,20 @@ import {
   IRow,
   IResource,
   IColumnDef,
-  ITreeNode,
   getBadgeColor,
   getPercentColor,
 } from "../utils/types";
 import { applySearch, applyFilters, applySorting, formatDate } from "../utils/helpers";
-import { buildTreeOrder, filterVisibleRows } from "../utils/treeUtils";
+import { ITreeNode, buildTreeOrder, filterVisibleRows } from "../utils/treeUtils";
 import { useColumnResize } from "../hooks/useColumnResize";
 import { useSortFilter } from "../hooks/useSortFilter";
-import { useTreeState } from "../hooks/useTreeState";
 import { ResizableHeader } from "./ResizableHeader";
 import { MultiSelectDropdown } from "./MultiSelectDropdown";
 import { EditableCell } from "./EditableCell";
-import { TreeChevron } from "./TreeChevron";
 
 export type { IRow, IResource };
 
-export interface IProjectGridProps {
+export interface IModernTableProps {
   rows: IRow[];
   columns: IColumnDef[];
   resources: IResource[];
@@ -30,35 +27,20 @@ export interface IProjectGridProps {
   enableSearch: boolean;
   editableColumnKeys: Set<string>;
   tableHeight: number;
-  // Tree/hierarchy
   outlineLevelKey?: string;
   parentIdKey?: string;
   sortOrderKey?: string;
-  // Selection
   enableSelection?: boolean;
   onSelectionChange?: (selectedIds: string[]) => void;
-  // Inline create
   enableInlineCreate?: boolean;
   onTaskCreate?: (payload: { parentId: string | null; title: string; outlineLevel: number }) => void;
-  // Existing
   onResourceChange?: (rowId: string, resourceIds: string[]) => void;
   onCellChange?: (rowId: string, columnKey: string, newValue: string) => void;
   onPeopleSearchChange?: (query: string) => void;
   isSearchingAD?: boolean;
 }
 
-/**
- * Generic Modern Table component.
- *
- * Features:
- * - Dynamic columns from any data source
- * - Resizable columns (drag column edges)
- * - Sortable columns (click headers to cycle asc -> desc -> none)
- * - Filterable columns (checkbox popovers for OptionSet / resource columns)
- * - Global search across all column values
- * - Optional multi-select resource assignment with searchable dropdown
- */
-export const ProjectGrid: React.FC<IProjectGridProps> = ({
+export const ModernTable: React.FC<IModernTableProps> = ({
   rows,
   columns,
   resources,
@@ -83,9 +65,20 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
 }) => {
   const isTreeMode = !!(outlineLevelKey && parentIdKey && sortOrderKey);
 
+  // Tree collapse state (in-memory, no localStorage)
+  const [collapsedIds, setCollapsedIds] = React.useState<Set<string>>(new Set());
+  const toggleExpand = React.useCallback((rowId: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowId)) { next.delete(rowId); } else { next.add(rowId); }
+      return next;
+    });
+  }, []);
+  const expandAll = React.useCallback(() => setCollapsedIds(new Set()), []);
+  const collapseAll = React.useCallback((parentIds: string[]) => setCollapsedIds(new Set(parentIds)), []);
+
   // Selection state
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
-
   // Inline create state
   const [isCreating, setIsCreating] = React.useState(false);
   const [newTaskTitle, setNewTaskTitle] = React.useState("");
@@ -130,16 +123,7 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
     activeFilterCount,
   } = useSortFilter();
 
-  // Tree state (expand/collapse)
-  const {
-    collapsedIds,
-    toggleExpand,
-    expandAll,
-    collapseAll,
-    isExpanded,
-  } = useTreeState("projectgrid");
-
-  // Process rows: search -> filter -> tree order (or sort) -> render
+  // Process rows: search -> filter -> tree or sort
   const processedData = React.useMemo(() => {
     let result = rows;
     result = applySearch(result, searchText, resources);
@@ -158,14 +142,13 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
   const processedRows = processedData.rows;
   const treeNodes = processedData.treeNodes;
 
-  // Get all parent IDs for collapse-all
   const allParentIds = React.useMemo(() => {
-    if (!treeNodes) return [];
+    if (!treeNodes) return [] as string[];
     return treeNodes.filter((n) => n.hasChildren).map((n) => n.row.id);
   }, [treeNodes]);
 
   // Render a table cell based on its column type
-  const renderCell = (row: IRow, column: IColumnDef, colIndex: number, treeNode?: ITreeNode): React.ReactNode => {
+  const renderCell = (row: IRow, column: IColumnDef, colIndex?: number, treeNode?: ITreeNode): React.ReactNode => {
     const rawValue = row.values[column.key];
     const displayValue = row.formattedValues[column.key] || "";
     const isEditable = editableColumnKeys.has(column.key) && column.cellType !== "resources";
@@ -185,14 +168,35 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
       );
     };
 
-    // Tree chevron for first data column
-    const treePrefix = (isTreeMode && colIndex === 0 && treeNode) ? (
-      <TreeChevron
-        isExpanded={isExpanded(row.id)}
-        hasChildren={treeNode.hasChildren}
-        depth={treeNode.depth}
-        onToggle={() => toggleExpand(row.id)}
-      />
+    // Tree chevron for the first column
+    const isFirstCol = colIndex === 0;
+    const treeIndent = (isTreeMode && isFirstCol && treeNode) ? (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          paddingLeft: treeNode.depth * 20,
+          marginRight: 4,
+          flexShrink: 0,
+        }}
+      >
+        {treeNode.hasChildren ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleExpand(row.id); }}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              padding: "0 4px", fontSize: 10, color: "#64748b",
+              lineHeight: 1, display: "inline-flex", alignItems: "center",
+              justifyContent: "center", width: 18, height: 18, borderRadius: 4,
+            }}
+            title={collapsedIds.has(row.id) ? "Expand" : "Collapse"}
+          >
+            {collapsedIds.has(row.id) ? "\u25B6" : "\u25BC"}
+          </button>
+        ) : (
+          <span style={{ width: 18, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#cbd5e1", fontSize: 8 }}>{"\u25CF"}</span>
+        )}
+      </span>
     ) : null;
 
     switch (column.cellType) {
@@ -200,8 +204,8 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
         return wrapEditable(
           <span
             style={{
-              fontWeight: colIndex === 0 ? 600 : 400,
-              color: colIndex === 0 ? "#1e293b" : "#334155",
+              fontWeight: isFirstCol ? 600 : 400,
+              color: isFirstCol ? "#1e293b" : "#334155",
               fontSize: 13,
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -211,7 +215,22 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
             }}
             title={displayValue}
           >
-            {treePrefix}
+            {treeIndent}
+            {displayValue}
+          </span>
+        );
+
+      case "number":
+        return wrapEditable(
+          <span
+            style={{
+              color: "#334155",
+              fontSize: 13,
+              fontVariantNumeric: "tabular-nums",
+              display: "block",
+              textAlign: "right",
+            }}
+          >
             {displayValue}
           </span>
         );
@@ -222,7 +241,6 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
         const barColor = getPercentColor(clampedVal);
         return wrapEditable(
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {treePrefix}
             <div
               style={{
                 flex: 1,
@@ -230,7 +248,6 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
                 background: "#f1f5f9",
                 borderRadius: 8,
                 overflow: "hidden",
-                position: "relative",
                 minWidth: 60,
               }}
             >
@@ -259,21 +276,6 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
           </div>
         );
       }
-
-      case "number":
-        return wrapEditable(
-          <span
-            style={{
-              color: "#334155",
-              fontSize: 13,
-              fontVariantNumeric: "tabular-nums",
-              display: "block",
-              textAlign: "right",
-            }}
-          >
-            {displayValue}
-          </span>
-        );
 
       case "date":
         return wrapEditable(
@@ -489,33 +491,13 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
             <>
               <button
                 onClick={expandAll}
-                style={{
-                  padding: "6px 10px",
-                  border: "1.5px solid #e2e8f0",
-                  borderRadius: 8,
-                  background: "#fff",
-                  color: "#475569",
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
+                style={{ padding: "6px 10px", border: "1.5px solid #e2e8f0", borderRadius: 8, background: "#fff", color: "#475569", fontSize: 11.5, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
               >
                 {"\u25BC"} Expand All
               </button>
               <button
                 onClick={() => collapseAll(allParentIds)}
-                style={{
-                  padding: "6px 10px",
-                  border: "1.5px solid #e2e8f0",
-                  borderRadius: 8,
-                  background: "#fff",
-                  color: "#475569",
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
+                style={{ padding: "6px 10px", border: "1.5px solid #e2e8f0", borderRadius: 8, background: "#fff", color: "#475569", fontSize: 11.5, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
               >
                 {"\u25B6"} Collapse All
               </button>
@@ -552,26 +534,14 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
           <thead>
             <tr>
               {enableSelection && (
-                <th
-                  style={{
-                    width: 40,
-                    padding: "10px 8px",
-                    borderBottom: "2px solid #e2e8f0",
-                    textAlign: "center",
-                  }}
-                >
+                <th style={{ width: 40, padding: "10px 8px", borderBottom: "2px solid #e2e8f0", textAlign: "center" }}>
                   <input
                     type="checkbox"
                     checked={processedRows.length > 0 && selectedIds.size === processedRows.length}
                     onChange={(e) => {
-                      if (e.target.checked) {
-                        const all = new Set(processedRows.map((r) => r.id));
-                        setSelectedIds(all);
-                        onSelectionChange?.(Array.from(all));
-                      } else {
-                        setSelectedIds(new Set());
-                        onSelectionChange?.([]);
-                      }
+                      const next = e.target.checked ? new Set(processedRows.map((r) => r.id)) : new Set<string>();
+                      setSelectedIds(next);
+                      onSelectionChange?.(Array.from(next));
                     }}
                     style={{ cursor: "pointer", accentColor: "#3b82f6" }}
                   />
@@ -603,36 +573,22 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
               <tr
                 key={row.id}
                 className="table-row"
-                style={{
-                  transition: "background 0.1s",
-                  background: selectedIds.has(row.id) ? "#eff6ff" : undefined,
-                }}
+                style={{ transition: "background 0.1s", background: selectedIds.has(row.id) ? "#eff6ff" : undefined }}
                 onMouseEnter={(e) => {
-                  if (!selectedIds.has(row.id))
-                    (e.currentTarget as HTMLElement).style.background = "#fafbfe";
+                  if (!selectedIds.has(row.id)) (e.currentTarget as HTMLElement).style.background = "#fafbfe";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background =
-                    selectedIds.has(row.id) ? "#eff6ff" : "transparent";
+                  (e.currentTarget as HTMLElement).style.background = selectedIds.has(row.id) ? "#eff6ff" : "transparent";
                 }}
               >
                 {enableSelection && (
                   <td style={{ padding: "8px", textAlign: "center", borderBottom: "1px solid #f1f5f9" }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(row.id)}
-                      onChange={(e) => {
-                        const next = new Set(selectedIds);
-                        if (e.target.checked) {
-                          next.add(row.id);
-                        } else {
-                          next.delete(row.id);
-                        }
-                        setSelectedIds(next);
-                        onSelectionChange?.(Array.from(next));
-                      }}
-                      style={{ cursor: "pointer", accentColor: "#3b82f6" }}
-                    />
+                    <input type="checkbox" checked={selectedIds.has(row.id)} onChange={(e) => {
+                      const next = new Set(selectedIds);
+                      if (e.target.checked) { next.add(row.id); } else { next.delete(row.id); }
+                      setSelectedIds(next);
+                      onSelectionChange?.(Array.from(next));
+                    }} style={{ cursor: "pointer", accentColor: "#3b82f6" }} />
                   </td>
                 )}
                 {enrichedColumns.map((col, colIndex) => (
@@ -656,16 +612,9 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
               <tr>
                 <td
                   colSpan={enrichedColumns.length + (enableSelection ? 1 : 0)}
-                  style={{
-                    padding: 40,
-                    textAlign: "center",
-                    color: "#94a3b8",
-                    fontSize: 14,
-                  }}
+                  style={{ padding: 40, textAlign: "center", color: "#94a3b8", fontSize: 14 }}
                 >
-                  {rows.length === 0
-                    ? "No records found in the data source"
-                    : "No records match your current filters"}
+                  {rows.length === 0 ? "No records found in the data source" : "No records match your current filters"}
                 </td>
               </tr>
             )}
@@ -674,76 +623,24 @@ export const ProjectGrid: React.FC<IProjectGridProps> = ({
             {enableInlineCreate && onTaskCreate && (
               <tr>
                 {enableSelection && <td style={{ borderBottom: "1px solid #f1f5f9" }} />}
-                <td
-                  colSpan={enrichedColumns.length}
-                  style={{
-                    padding: "8px 12px",
-                    borderBottom: "1px solid #f1f5f9",
-                  }}
-                >
+                <td colSpan={enrichedColumns.length} style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9" }}>
                   {isCreating ? (
-                    <input
-                      type="text"
-                      value={newTaskTitle}
-                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                    <input type="text" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && newTaskTitle.trim()) {
-                          onTaskCreate({
-                            parentId: null,
-                            title: newTaskTitle.trim(),
-                            outlineLevel: 1,
-                          });
-                          setNewTaskTitle("");
-                          setIsCreating(false);
+                          onTaskCreate({ parentId: null, title: newTaskTitle.trim(), outlineLevel: 1 });
+                          setNewTaskTitle(""); setIsCreating(false);
                         }
-                        if (e.key === "Escape") {
-                          setNewTaskTitle("");
-                          setIsCreating(false);
-                        }
+                        if (e.key === "Escape") { setNewTaskTitle(""); setIsCreating(false); }
                       }}
-                      onBlur={() => {
-                        if (!newTaskTitle.trim()) {
-                          setIsCreating(false);
-                        }
-                      }}
-                      autoFocus
-                      placeholder="Enter task title..."
-                      style={{
-                        width: "100%",
-                        padding: "7px 12px",
-                        border: "1.5px solid #3b82f6",
-                        borderRadius: 6,
-                        fontSize: 13,
-                        outline: "none",
-                        boxSizing: "border-box",
-                      }}
+                      onBlur={() => { if (!newTaskTitle.trim()) setIsCreating(false); }}
+                      autoFocus placeholder="Enter task title..." style={{ width: "100%", padding: "7px 12px", border: "1.5px solid #3b82f6", borderRadius: 6, fontSize: 13, outline: "none", boxSizing: "border-box" }}
                     />
                   ) : (
-                    <button
-                      onClick={() => setIsCreating(true)}
-                      style={{
-                        background: "none",
-                        border: "2px dashed #cbd5e1",
-                        borderRadius: 6,
-                        padding: "8px 16px",
-                        color: "#64748b",
-                        fontSize: 13,
-                        cursor: "pointer",
-                        width: "100%",
-                        textAlign: "left",
-                        transition: "border-color 0.15s, color 0.15s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "#3b82f6";
-                        (e.currentTarget as HTMLElement).style.color = "#3b82f6";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "#cbd5e1";
-                        (e.currentTarget as HTMLElement).style.color = "#64748b";
-                      }}
-                    >
-                      {"＋ Add task"}
-                    </button>
+                    <button onClick={() => setIsCreating(true)} style={{ background: "none", border: "2px dashed #cbd5e1", borderRadius: 6, padding: "8px 16px", color: "#64748b", fontSize: 13, cursor: "pointer", width: "100%", textAlign: "left" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#3b82f6"; (e.currentTarget as HTMLElement).style.color = "#3b82f6"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#cbd5e1"; (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                    >+ Add task</button>
                   )}
                 </td>
               </tr>
