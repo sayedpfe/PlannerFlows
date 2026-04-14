@@ -45,16 +45,20 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
   public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
     this.context = context;
 
-    // Request max page size on first load
-    const dataset = context.parameters.dataSet;
-    if (dataset.paging) {
-      if (dataset.paging.pageSize !== 5000) {
-        dataset.paging.setPageSize(5000);
-      }
-    }
-
     try {
       const dataset = context.parameters.dataSet;
+
+      // Request larger page size (safe — wrapped in try-catch)
+      try {
+        if (dataset && dataset.paging && typeof dataset.paging.setPageSize === "function") {
+          if (dataset.paging.pageSize < 5000) {
+            dataset.paging.setPageSize(5000);
+          }
+        }
+      } catch {
+        // setPageSize not supported in this environment
+      }
+
       const resourceColumnName = context.parameters.resourceColumnName?.raw || "";
       const percentColumnName = (context.parameters as any).percentColumnName?.raw || "";
       const outlineLevelColumn = (context.parameters as any).outlineLevelColumn?.raw || "";
@@ -106,9 +110,9 @@ export class ProjectGrid implements ComponentFramework.ReactControl<IInputs, IOu
         onSelectionChange: enableSelection ? this.boundHandleSelectionChange : undefined,
         enableInlineCreate,
         onTaskCreate: enableInlineCreate ? this.boundHandleTaskCreate : undefined,
-        hasNextPage: dataset.paging?.hasNextPage ?? false,
-        loadNextPage: () => { if (dataset.paging?.hasNextPage) dataset.paging.loadNextPage(); },
-        totalRecordCount: dataset.paging?.totalResultCount ?? rows.length,
+        hasNextPage: !!(dataset.paging && dataset.paging.hasNextPage),
+        loadNextPage: () => { try { if (dataset.paging?.hasNextPage) dataset.paging.loadNextPage(); } catch { /* ignore */ } },
+        totalRecordCount: (dataset.paging && dataset.paging.totalResultCount > 0) ? dataset.paging.totalResultCount : rows.length,
         onResourceChange: resourceColumnName
           ? this.boundHandleResourceChange
           : undefined,
